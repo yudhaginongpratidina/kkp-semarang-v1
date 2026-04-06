@@ -17,13 +17,15 @@ type BaseProps = {
     size?: 'sm' | 'md' | 'lg';
 };
 
-type TextInputProps<T extends React.ElementType = 'div'> = {
+// Wrapper polymorphic props
+type WrapperProps<T extends React.ElementType> = {
     as?: T;
-} & BaseProps &
-    Omit<
-        React.ComponentPropsWithoutRef<T>,
-        keyof BaseProps | 'as' | 'children'
-    >;
+} & Omit<React.ComponentPropsWithoutRef<T>, 'children' | keyof BaseProps>;
+
+// Full TextInput props
+type TextInputProps<T extends React.ElementType = 'div'> = BaseProps &
+    WrapperProps<T> &
+    React.InputHTMLAttributes<HTMLInputElement>;
 
 type TextInputComponent = (<T extends React.ElementType = 'div'>(
     props: TextInputProps<T>,
@@ -82,7 +84,7 @@ const TextInputInner = <T extends React.ElementType = 'div'>(
     ref: React.ForwardedRef<any>,
 ) => {
     const {
-        as,
+        as: Wrapper = 'div',
         label,
         helperText,
         error,
@@ -92,15 +94,14 @@ const TextInputInner = <T extends React.ElementType = 'div'>(
         size,
         id,
         type = 'text',
-        ...rest
+        ...inputProps
     } = props;
 
-    const Component = (as || 'div') as React.ElementType;
     const generatedId = React.useId();
     const inputId = id || generatedId;
 
     return (
-        <Component ref={ref} className={wrapperStyles()}>
+        <Wrapper ref={ref} className={wrapperStyles()}>
             {label && (
                 <label htmlFor={inputId} className={labelStyles()}>
                     {label}
@@ -123,7 +124,7 @@ const TextInputInner = <T extends React.ElementType = 'div'>(
                     type={type}
                     disabled={disabled}
                     className={inputStyles()}
-                    {...rest}
+                    {...inputProps}
                 />
 
                 {suffix && (
@@ -132,11 +133,9 @@ const TextInputInner = <T extends React.ElementType = 'div'>(
             </div>
 
             {(helperText || error) && (
-                <p className={helperTextStyles()}>
-                    {error ? error : helperText}
-                </p>
+                <p className={helperTextStyles()}>{error ?? helperText}</p>
             )}
-        </Component>
+        </Wrapper>
     );
 };
 
