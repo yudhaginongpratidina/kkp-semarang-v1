@@ -11,6 +11,7 @@ export * from './time.input';
 export * from './checkbox.input';
 
 export * from './menu-tab';
+export * from './menu-item';
 export * from './menu-drawer';
 
 export * from './modal';
