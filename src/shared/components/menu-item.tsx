@@ -8,6 +8,7 @@ type MenuItemProps = {
     title: string;
     description?: string;
     icon?: React.ReactNode;
+    badge?: number | string; // angka atau string opsional di sebelah icon
     active?: boolean;
     disabled?: boolean;
     href?: string;
@@ -17,7 +18,7 @@ type MenuItemProps = {
  * STYLES
  */
 const itemStyles = cva(
-    'flex flex-col items-center justify-center p-4 border rounded-sm cursor-pointer select-none transition-colors duration-150 h-48', // tinggi konsisten
+    'flex flex-col items-center justify-center p-4 border rounded-sm cursor-pointer select-none transition-colors duration-150 h-48',
     {
         variants: {
             active: {
@@ -41,7 +42,7 @@ const descriptionStyles = cva(
     {
         variants: {
             clamp: {
-                true: 'line-clamp-3', // maksimal 3 baris, perlu plugin tailwind line-clamp
+                true: 'line-clamp-3',
                 false: '',
             },
         },
@@ -49,6 +50,10 @@ const descriptionStyles = cva(
             clamp: true,
         },
     },
+);
+
+const badgeStyles = cva(
+    'ml-2 bg-black text-white text-xs font-bold px-2 py-0.5 rounded-full',
 );
 
 /**
@@ -59,6 +64,7 @@ const MenuItemInner = (
         title,
         description,
         icon,
+        badge,
         active,
         disabled,
         href,
@@ -71,13 +77,20 @@ const MenuItemInner = (
 
     return (
         <Component
-            ref={ref as any} // aman karena div atau a
+            ref={ref as any}
             href={href}
             className={itemStyles({ active, disabled, className })}
             {...props}
         >
-            {/* Icon */}
-            {icon && <div className="mb-2">{icon}</div>}
+            {/* Icon + Badge */}
+            {icon && (
+                <div className="mb-2 flex items-center relative">
+                    {icon}
+                    {badge !== undefined && (
+                        <span className={badgeStyles()}>{badge}</span>
+                    )}
+                </div>
+            )}
 
             {/* Title & Description */}
             <div className="flex flex-col items-center justify-start">
