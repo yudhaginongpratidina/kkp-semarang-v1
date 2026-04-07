@@ -4,6 +4,7 @@ import { createBrowserRouter } from 'react-router-dom';
 // routing with skeleton
 import AuthRoutesWithSkeleton from '../modules/auth/routes';
 import MenuRoutesWithSkeleton from '../modules/menu/routes';
+import OfficerRoutesWithSkeleton from '../modules/officer/routes';
 
 // main router
 export const router = createBrowserRouter([
@@ -14,5 +15,9 @@ export const router = createBrowserRouter([
     {
         path: '/auth/*',
         Component: AuthRoutesWithSkeleton,
+    },
+    {
+        path: '/officers/*',
+        Component: OfficerRoutesWithSkeleton,
     },
 ]);

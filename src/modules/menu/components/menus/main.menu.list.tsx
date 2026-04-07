@@ -67,6 +67,7 @@ export default function MainMenuList() {
             />
 
             <MenuItem
+                href="/officers"
                 title="Officers"
                 description="Manajemen petugas dan staf yang bertanggung jawab di lapangan"
                 icon={<IoIosContacts size={32} className="text-black" />}

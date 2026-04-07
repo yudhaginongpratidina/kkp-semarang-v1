@@ -44,7 +44,7 @@ const contentStyles = cva(
 
 const headerStyles = cva('flex items-center justify-between');
 
-const titleStyles = cva('text-sm font-medium text-black');
+const titleStyles = cva('text-sm font-bold text-black');
 
 const closeStyles = cva('text-black cursor-pointer text-sm');
 

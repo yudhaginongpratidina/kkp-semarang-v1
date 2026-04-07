@@ -18,3 +18,4 @@ export * from './modal';
 export * from './stat';
 export * from './skeleton';
 export * from './button';
+export * from './table';
