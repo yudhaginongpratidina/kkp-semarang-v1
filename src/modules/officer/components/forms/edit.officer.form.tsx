@@ -8,7 +8,13 @@ import {
 export default function EditOfficerForm({ id }: { id: string }) {
     return (
         <Form>
-            <TextInput name="id" label="ID Petugas" value={id} required />
+            <TextInput
+                name="id"
+                label="ID Petugas"
+                value={id}
+                disabled
+                required
+            />
             <TextInput
                 name="name"
                 label="Nama Petugas"
