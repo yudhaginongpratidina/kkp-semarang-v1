@@ -5,6 +5,7 @@ import { createBrowserRouter } from 'react-router-dom';
 import AuthRoutesWithSkeleton from '../modules/auth/routes';
 import MenuRoutesWithSkeleton from '../modules/menu/routes';
 import OfficerRoutesWithSkeleton from '../modules/officer/routes';
+import TraderRoutesWithSkeleton from '../modules/trader/routes';
 
 // main router
 export const router = createBrowserRouter([
@@ -19,5 +20,9 @@ export const router = createBrowserRouter([
     {
         path: '/officers/*',
         Component: OfficerRoutesWithSkeleton,
+    },
+    {
+        path: '/traders/*',
+        Component: TraderRoutesWithSkeleton,
     },
 ]);

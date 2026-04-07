@@ -53,6 +53,7 @@ export default function MainMenuList() {
             />
 
             <MenuItem
+                href="/traders"
                 title="Traders"
                 description="Kelola profil trader dan validasi data NPWP untuk kepatuhan transaksi."
                 icon={<IoIosPeople size={32} className="text-black" />}
