@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 
-import { ItemQueue } from '../../../../shared/components';
+import { ItemQueue, Modal } from '../../../../shared/components';
+import SMKHPOfflineForm from '../forms/smkhp-offline.form';
 
 /**
  * =========================================================
@@ -16,7 +17,7 @@ type RawQueueItem = {
     queue: number;
     name: string;
     phone: string;
-    status: string; // 🔴 dari API (bebas)
+    status: string;
 };
 
 type QueueItem = {
@@ -24,14 +25,14 @@ type QueueItem = {
     queue: number;
     name: string;
     phone: string;
-    status: QueueStatus; // ✅ sudah aman
+    status: QueueStatus;
 };
 
 type SMKHPOfflineQueueListProps = Omit<
     React.ComponentPropsWithoutRef<'div'>,
     'children'
 > & {
-    data: RawQueueItem[]; // 🔥 TERIMA RAW DATA
+    data: RawQueueItem[];
     onAction?: (item: QueueItem) => void;
     onRecall?: (item: QueueItem) => void;
     defaultFilter?: QueueStatus | 'All';
@@ -83,14 +84,7 @@ const filterButtonVariants = cva(
  */
 
 export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
-    const {
-        data,
-        onAction,
-        onRecall,
-        defaultFilter = 'All',
-        className,
-        ...rest
-    } = props;
+    const { data, defaultFilter = 'All', className, ...rest } = props;
 
     /**
      * 🔥 FIX: normalize sekali di sini
@@ -152,8 +146,25 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                         status={
                             item.status === 'Pending' ? 'Menunggu' : item.status
                         }
-                        onAction={() => onAction?.(item)}
-                        onRecall={() => onRecall?.(item)}
+                        onAction={
+                            item.status === 'Menunggu' ? (
+                                <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                                    Proses
+                                </button>
+                            ) : (
+                                <Modal
+                                    title="SMKHP Offline"
+                                    trigger={
+                                        <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                                            Detail
+                                        </button>
+                                    }
+                                >
+                                    <SMKHPOfflineForm id={item.token} />
+                                </Modal>
+                            )
+                        }
+                        onRecall={() => ''}
                     />
                 ))}
             </div>

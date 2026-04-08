@@ -35,15 +35,7 @@ export default function SMKHPOfflinePage() {
                 processing_counter={0}
                 waiting_counter={0}
             />
-            <SMKHPOfflineQueue
-                data={data}
-                onAction={(item) => {
-                    console.log('ACTION:', item);
-                }}
-                onRecall={(item) => {
-                    console.log('RECALL:', item);
-                }}
-            />
+            <SMKHPOfflineQueue data={data} />
         </SMKHPOfflineLayout>
     );
 }

@@ -24,14 +24,14 @@ type BaseProps = {
     phone: string;
     serviceType: ServiceType;
     status: QueueStatus;
-    onAction?: () => void;
+    onAction?: (() => void) | React.ReactNode;
     onRecall?: () => void;
     disabled?: boolean;
 };
 
 /**
  * =========================================================
- * POLYMORPHIC TYPES (STABLE PATTERN)
+ * POLYMORPHIC TYPES
  * =========================================================
  */
 
@@ -139,7 +139,7 @@ const getServiceMeta = (type: ServiceType) => {
 
 /**
  * =========================================================
- * COMPONENT (NON-GENERIC CORE)
+ * COMPONENT
  * =========================================================
  */
 
@@ -148,7 +148,7 @@ const ItemQueueBase = (
         'div',
         BaseProps & VariantProps<typeof containerVariants>
     >,
-    ref: PolymorphicRef<'div'>,
+    ref: React.ForwardedRef<any>,
 ) => {
     const {
         as: Component = 'div',
@@ -169,6 +169,8 @@ const ItemQueueBase = (
 
     const isWaiting = status === 'Menunggu';
     const isProcessing = status === 'Diproses';
+
+    const isCustomAction = React.isValidElement(onAction);
 
     return (
         <Component
@@ -223,19 +225,23 @@ const ItemQueueBase = (
                     </button>
                 )}
 
-                <button
-                    onClick={onAction}
-                    disabled={disabled}
-                    className={`px-4 py-2 text-[10px] font-black uppercase border transition-all rounded-sm
-                        ${
-                            isWaiting
-                                ? 'bg-black text-white border-black hover:bg-white hover:text-black'
-                                : 'border-slate-300 text-black hover:border-black'
-                        }
-                    `}
-                >
-                    {isWaiting ? 'START PROSES' : 'VIEW DATA'}
-                </button>
+                {isCustomAction ? (
+                    onAction
+                ) : (
+                    <button
+                        onClick={onAction as () => void}
+                        disabled={disabled}
+                        className={`px-4 py-2 text-[10px] font-black uppercase border transition-all rounded-sm
+                            ${
+                                isWaiting
+                                    ? 'bg-black text-white border-black hover:bg-white hover:text-black'
+                                    : 'border-slate-300 text-black hover:border-black'
+                            }
+                        `}
+                    >
+                        {isWaiting ? 'START PROSES' : 'VIEW DATA'}
+                    </button>
+                )}
             </div>
         </Component>
     );
@@ -243,7 +249,7 @@ const ItemQueueBase = (
 
 /**
  * =========================================================
- * EXPORT (POLYMORPHIC CAST)
+ * EXPORT
  * =========================================================
  */
 
