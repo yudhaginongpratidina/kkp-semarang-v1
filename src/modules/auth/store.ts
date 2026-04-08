@@ -1,9 +1,7 @@
 import { create } from 'zustand';
-import { toast } from 'sonner';
-
-import { signInWithEmailAndPassword, signOut } from 'firebase/auth';
-import { auth, db } from '../../shared/configs/firebase';
+import { signInWithEmailAndPassword } from 'firebase/auth';
 import { doc, getDoc } from 'firebase/firestore';
+import { auth, db } from '../../shared/configs/firebase';
 
 type AuthState = {
     email: string;
@@ -11,40 +9,42 @@ type AuthState = {
     is_loading: boolean;
     is_error: boolean;
     message: string;
+    response: {
+        id: string;
+        email: string;
+        full_name: string;
+        nip: string;
+        role: string;
+    };
 };
 
 type AuthAction = {
-    setField: <K extends keyof AuthState>(key: K, value: AuthState[K]) => void;
-    reset: () => void;
-    login: () => Promise<void>;
-    logout: () => Promise<void>;
+    set_field: <K extends keyof AuthState>(key: K, value: AuthState[K]) => void;
+    login: (e?: React.FormEvent) => Promise<{
+        success: boolean;
+        data?: AuthState['response'];
+        message?: string;
+    }>;
 };
 
-const initialState: Omit<AuthState, 'is_loading' | 'is_error' | 'message'> = {
+const initialState: AuthState = {
     email: '',
     password: '',
-};
-
-export const useNoAjuStore = create<AuthState & AuthAction>((set, get) => ({
-    ...initialState,
     is_loading: false,
     is_error: false,
     message: '',
+    response: { id: '', email: '', full_name: '', nip: '', role: '' },
+};
 
-    setField: (key, value) => set((state) => ({ ...state, [key]: value })),
+const useAuthStore = create<AuthState & AuthAction>()((set, get) => ({
+    ...initialState,
+    set_field: (key, value) => set((state) => ({ ...state, [key]: value })),
 
-    reset: () =>
-        set({
-            ...initialState,
-            is_loading: false,
-            is_error: false,
-            message: '',
-        }),
-
-    login: async () => {
+    login: async (e?: React.FormEvent) => {
+        e?.preventDefault();
         const { email, password } = get();
-        const toastId = toast.loading('logging in...');
-        set({ is_loading: true, is_error: false });
+        set({ is_loading: true, is_error: false, message: '' });
+
         try {
             const userCredential = await signInWithEmailAndPassword(
                 auth,
@@ -52,41 +52,31 @@ export const useNoAjuStore = create<AuthState & AuthAction>((set, get) => ({
                 password,
             );
             const uid = userCredential.user.uid;
+            const officerDoc = await getDoc(doc(db, 'officers', uid));
 
-            const userDoc = await getDoc(doc(db, 'officers', uid));
-            if (userDoc.exists()) {
-                const data = userDoc.data();
-                toast.success(`Access Granted: Welcome ${data.full_name}`, {
-                    id: toastId,
-                });
-                // return { id: uid, ...data };
+            if (officerDoc.exists()) {
+                const data = officerDoc.data();
+                const userData = {
+                    id: uid,
+                    email: data.email || '',
+                    full_name: data.full_name || '',
+                    role: data.role || '',
+                    nip: data.nip || '',
+                };
+
+                set({ response: userData, is_loading: false });
+                return { success: true, data: userData };
             } else {
-                throw new Error('USER_NOT_FOUND_IN_DATABASE');
+                throw new Error('User tidak ditemukan di Firestore.');
             }
         } catch (error: any) {
-            let errMsg = 'AUTH_ERROR';
-            if (error.code === 'auth/user-not-found') errMsg = 'USER_NOT_FOUND';
-            else if (error.code === 'auth/wrong-password')
-                errMsg = 'INVALID_CREDENTIALS';
-            else errMsg = error.message;
-
-            set({ is_error: true, message: errMsg });
-            toast.error(errMsg, { id: toastId });
-        } finally {
-            set({ is_loading: false });
-        }
-    },
-
-    logout: async () => {
-        const toastId = toast.loading('Logging out...');
-        try {
-            await signOut(auth);
-            set({ ...initialState });
-            toast.success('Session telah berakhir', { id: toastId });
-            setTimeout(() => (window.location.href = '/auth/login'), 1000);
-        } catch (error: any) {
-            set({ is_error: true, message: error.message });
-            toast.error('Logout gagal', { id: toastId });
+            let errMsg = error.message;
+            if (error.code === 'auth/invalid-credential')
+                errMsg = 'Email atau password salah.';
+            set({ is_error: true, message: errMsg, is_loading: false });
+            return { success: false, message: errMsg };
         }
     },
 }));
+
+export default useAuthStore;
