@@ -1,6 +1,7 @@
 // react
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import RoleGuard from '../../shared/auth/role-guard';
 
 // skeleton
 import SMKHPOnlineSkeleton from './components/skeletons/smkhp-online.skeleton';
@@ -14,9 +15,11 @@ export default function SMKHPOnlineRoutesWithSkeleton() {
             <Route
                 path="/"
                 element={
-                    <Suspense fallback={<SMKHPOnlineSkeleton />}>
-                        <SMKHPOnlinePage />
-                    </Suspense>
+                    <RoleGuard feature="smkhp-online">
+                        <Suspense fallback={<SMKHPOnlineSkeleton />}>
+                            <SMKHPOnlinePage />
+                        </Suspense>
+                    </RoleGuard>
                 }
             />
         </Routes>

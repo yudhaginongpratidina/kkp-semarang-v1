@@ -1,6 +1,7 @@
 // react
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import RoleGuard from '../../shared/auth/role-guard';
 
 // skeleton
 import OfficerSkeleton from './components/skeletons/officer.skeleton';
@@ -14,9 +15,11 @@ export default function OfficerRoutesWithSkeleton() {
             <Route
                 path="/"
                 element={
-                    <Suspense fallback={<OfficerSkeleton />}>
-                        <OfficerPage />
-                    </Suspense>
+                    <RoleGuard feature="officers">
+                        <Suspense fallback={<OfficerSkeleton />}>
+                            <OfficerPage />
+                        </Suspense>
+                    </RoleGuard>
                 }
             />
         </Routes>

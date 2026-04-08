@@ -1,6 +1,7 @@
 // react
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import RoleGuard from '../../shared/auth/role-guard';
 
 // skeleton
 import CustomerServiceOnlineSkeleton from './components/skeletons/customer-service-online.skeleton';
@@ -16,9 +17,11 @@ export default function CustomerServiceOnlineRoutesWithSkeleton() {
             <Route
                 path="/"
                 element={
-                    <Suspense fallback={<CustomerServiceOnlineSkeleton />}>
-                        <CustomerServiceOnlinePage />
-                    </Suspense>
+                    <RoleGuard feature="customer-service-online">
+                        <Suspense fallback={<CustomerServiceOnlineSkeleton />}>
+                            <CustomerServiceOnlinePage />
+                        </Suspense>
+                    </RoleGuard>
                 }
             />
         </Routes>

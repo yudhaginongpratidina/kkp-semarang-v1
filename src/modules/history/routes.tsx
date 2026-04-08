@@ -1,6 +1,7 @@
 // react
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import RoleGuard from '../../shared/auth/role-guard';
 
 // skeleton
 import HistorySkeleton from './components/skeletons/history.skeleton';
@@ -14,9 +15,11 @@ export default function HistoryRoutesWithSkeleton() {
             <Route
                 path="/"
                 element={
-                    <Suspense fallback={<HistorySkeleton />}>
-                        <HistoryPage />
-                    </Suspense>
+                    <RoleGuard feature="history">
+                        <Suspense fallback={<HistorySkeleton />}>
+                            <HistoryPage />
+                        </Suspense>
+                    </RoleGuard>
                 }
             />
         </Routes>

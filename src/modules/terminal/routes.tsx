@@ -1,6 +1,7 @@
 // react
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import RoleGuard from '../../shared/auth/role-guard';
 
 // pages
 const TerminalPage = lazy(() => import('./pages/terminal.page'));
@@ -11,9 +12,11 @@ export default function TerminalRoutesWithSkeleton() {
             <Route
                 path="/"
                 element={
-                    <Suspense fallback={'Loading...'}>
-                        <TerminalPage />
-                    </Suspense>
+                    <RoleGuard feature="terminal">
+                        <Suspense fallback={'Loading...'}>
+                            <TerminalPage />
+                        </Suspense>
+                    </RoleGuard>
                 }
             />
         </Routes>

@@ -1,6 +1,7 @@
 // react
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import RoleGuard from '../../shared/auth/role-guard';
 
 // skeleton
 import TraderSkeleton from './components/skeletons/trader.skeleton';
@@ -14,9 +15,11 @@ export default function TraderRoutesWithSkeleton() {
             <Route
                 path="/"
                 element={
-                    <Suspense fallback={<TraderSkeleton />}>
-                        <TraderPage />
-                    </Suspense>
+                    <RoleGuard feature="traders">
+                        <Suspense fallback={<TraderSkeleton />}>
+                            <TraderPage />
+                        </Suspense>
+                    </RoleGuard>
                 }
             />
         </Routes>

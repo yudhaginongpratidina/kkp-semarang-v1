@@ -1,6 +1,7 @@
 // react
 import { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
+import RoleGuard from '../../shared/auth/role-guard';
 
 // skeleton
 import SMKHPOfflineSkeleton from './components/skeletons/smkhp-offline.skeleton';
@@ -14,9 +15,11 @@ export default function SMKHPOfflineRoutesWithSkeleton() {
             <Route
                 path="/"
                 element={
-                    <Suspense fallback={<SMKHPOfflineSkeleton />}>
-                        <SMKHPOfflinePage />
-                    </Suspense>
+                    <RoleGuard feature="smkhp-offline">
+                        <Suspense fallback={<SMKHPOfflineSkeleton />}>
+                            <SMKHPOfflinePage />
+                        </Suspense>
+                    </RoleGuard>
                 }
             />
         </Routes>
