@@ -10,7 +10,6 @@ type History = {
 };
 
 export default function HistroyTable() {
-    // Tabs global untuk semua row
     const tabs = [
         { label: 'SMKHP Offline', value: 'smkhp-offline' },
         { label: 'SMKHP Online', value: 'smkhp-online' },
@@ -20,6 +19,12 @@ export default function HistroyTable() {
 
     // State per row
     const [activeMap, setActiveMap] = useState<Record<string, string>>({});
+    const [historyModalOpenMap, setHistoryModalOpenMap] = useState<
+        Record<string, boolean>
+    >({});
+    const [editModalOpenMap, setEditModalOpenMap] = useState<
+        Record<string, boolean>
+    >({});
 
     const columns: ColumnDef<History>[] = [
         {
@@ -43,19 +48,28 @@ export default function HistroyTable() {
             enableColumnFilter: false,
             cell: ({ row }) => {
                 const current = activeMap[row.original.id] ?? 'smkhp-offline';
+                const isHistoryModalOpen =
+                    historyModalOpenMap[row.original.id] ?? false;
+                const isEditModalOpen =
+                    editModalOpenMap[row.original.id] ?? false;
 
                 return (
                     <div className="flex items-center gap-2">
-                        {/* Riwayat Modal */}
                         <Modal
                             title="Riwayat"
+                            open={isHistoryModalOpen}
+                            onOpenChange={(open) =>
+                                setHistoryModalOpenMap((prev) => ({
+                                    ...prev,
+                                    [row.original.id]: open,
+                                }))
+                            }
                             trigger={
                                 <button className="hover:cursor-pointer">
                                     Riwayat
                                 </button>
                             }
                         >
-                            {/* Stop event propagation agar modal tidak close */}
                             <div
                                 onClick={(e) => e.stopPropagation()}
                                 onMouseDown={(e) => e.stopPropagation()}
@@ -85,12 +99,16 @@ export default function HistroyTable() {
                                 )}
                             </div>
                         </Modal>
-
                         <span>|</span>
-
-                        {/* Edit Modal */}
                         <Modal
                             title="Edit"
+                            open={isEditModalOpen}
+                            onOpenChange={(open) =>
+                                setEditModalOpenMap((prev) => ({
+                                    ...prev,
+                                    [row.original.id]: open,
+                                }))
+                            }
                             trigger={
                                 <button className="hover:cursor-pointer">
                                     Edit
