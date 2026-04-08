@@ -11,6 +11,8 @@ import TerminalRoutesWithSkeleton from '../modules/terminal/routes';
 
 import SMKHPOfflineRoutesWithSkeleton from '../modules/smkhp-offline/routes';
 import CustomerServiceOfflineRoutesWithSkeleton from '../modules/customer-service-offline/routes';
+import SMKHPOnlineRoutesWithSkeleton from '../modules/smkhp-online/routes';
+import CustomerServiceOnlineRoutesWithSkeleton from '../modules/customer-service-online/routes';
 
 // main router
 export const router = createBrowserRouter([
@@ -45,5 +47,13 @@ export const router = createBrowserRouter([
     {
         path: '/customer-service-offline/*',
         Component: CustomerServiceOfflineRoutesWithSkeleton,
+    },
+    {
+        path: '/smkhp-online/*',
+        Component: SMKHPOnlineRoutesWithSkeleton,
+    },
+    {
+        path: '/customer-service-online/*',
+        Component: CustomerServiceOnlineRoutesWithSkeleton,
     },
 ]);
