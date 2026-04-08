@@ -15,6 +15,7 @@ export default function MainMenuList() {
     return (
         <>
             <MenuItem
+                href="/smkhp-offline"
                 title="SMKHP"
                 description="Dokumen resmi KKP yang menjamin produk perikanan Indonesia memenuhi standar keamanan pangan internasional"
                 icon={<IoIosDocument size={32} className="text-black" />}
