@@ -7,6 +7,7 @@ import MenuRoutesWithSkeleton from '../modules/menu/routes';
 import OfficerRoutesWithSkeleton from '../modules/officer/routes';
 import TraderRoutesWithSkeleton from '../modules/trader/routes';
 import HistoryRoutesWithSkeleton from '../modules/history/routes';
+import TerminalRoutesWithSkeleton from '../modules/terminal/routes';
 
 import SMKHPOfflineRoutesWithSkeleton from '../modules/smkhp-offline/routes';
 
@@ -31,6 +32,10 @@ export const router = createBrowserRouter([
     {
         path: '/history/*',
         Component: HistoryRoutesWithSkeleton,
+    },
+    {
+        path: '/terminal/*',
+        Component: TerminalRoutesWithSkeleton,
     },
     {
         path: '/smkhp-offline/*',

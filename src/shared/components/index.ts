@@ -20,3 +20,4 @@ export * from './skeleton';
 export * from './button';
 export * from './table';
 export * from './item-queue';
+export * from './queue-monitor';
