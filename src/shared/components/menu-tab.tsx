@@ -105,7 +105,11 @@ const MenuTabInner = (
                             active: isActive,
                             disabled: disabled || tab.disabled,
                         })}
-                        onClick={() => handleChange(tab.value)}
+                        onClick={(e) => {
+                            e.stopPropagation(); // ✨ hentikan propagation agar modal tidak close
+                            handleChange(tab.value);
+                        }}
+                        onMouseDown={(e) => e.stopPropagation()} // ✨ aman untuk modal yang mendeteksi mousedown
                     >
                         {tab.icon && (
                             <span className={iconStyles()}>{tab.icon}</span>
