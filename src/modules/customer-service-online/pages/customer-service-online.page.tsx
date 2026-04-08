@@ -35,15 +35,7 @@ export default function CustomerServiceOnlinePage() {
                 processing_counter={0}
                 waiting_counter={0}
             />
-            <CustomerServiceOnlineQueue
-                data={data}
-                onAction={(item) => {
-                    console.log('ACTION:', item);
-                }}
-                onRecall={(item) => {
-                    console.log('RECALL:', item);
-                }}
-            />
+            <CustomerServiceOnlineQueue data={data} />
         </CustomerServiceOnlineLayout>
     );
 }

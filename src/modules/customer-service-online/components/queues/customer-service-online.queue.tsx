@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 
-import { ItemQueue } from '../../../../shared/components';
+import { ItemQueue, Modal } from '../../../../shared/components';
+import CustomerServiceOnlineForm from '../forms/customer-service-online.form';
 
 type QueueStatus = 'Pending' | 'Menunggu' | 'Diproses';
 
@@ -26,8 +27,6 @@ type CustomerServiceOnlineQueueListProps = Omit<
     'children'
 > & {
     data: RawQueueItem[];
-    onAction?: (item: QueueItem) => void;
-    onRecall?: (item: QueueItem) => void;
     defaultFilter?: QueueStatus | 'All';
 };
 
@@ -61,14 +60,7 @@ const filterButtonVariants = cva(
 export default function CustomerServiceOnlineQueue(
     props: CustomerServiceOnlineQueueListProps,
 ) {
-    const {
-        data,
-        onAction,
-        onRecall,
-        defaultFilter = 'All',
-        className,
-        ...rest
-    } = props;
+    const { data, defaultFilter = 'All', className, ...rest } = props;
 
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
@@ -122,11 +114,28 @@ export default function CustomerServiceOnlineQueue(
                         name={item.name}
                         phone={item.phone}
                         serviceType="customer-service-online"
-                        status={
-                            item.status === 'Pending' ? 'Menunggu' : item.status
+                        status={item.status}
+                        onAction={
+                            item.status === 'Menunggu' ? (
+                                <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                                    PROSES
+                                </button>
+                            ) : item.status === 'Diproses' ? (
+                                <Modal
+                                    title="CUSTOMER SERVICE OFFLINE"
+                                    trigger={
+                                        <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                                            DETAIL
+                                        </button>
+                                    }
+                                >
+                                    <CustomerServiceOnlineForm
+                                        id={item.token}
+                                    />
+                                </Modal>
+                            ) : null
                         }
-                        onAction={() => onAction?.(item)}
-                        onRecall={() => onRecall?.(item)}
+                        onRecall={() => ''}
                     />
                 ))}
             </div>
