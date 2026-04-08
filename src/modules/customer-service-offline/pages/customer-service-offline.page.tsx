@@ -35,15 +35,7 @@ export default function CustomerServiceOfflinePage() {
                 processing_counter={0}
                 waiting_counter={0}
             />
-            <CustomerServiceOfflineQueue
-                data={data}
-                onAction={(item) => {
-                    console.log('ACTION:', item);
-                }}
-                onRecall={(item) => {
-                    console.log('RECALL:', item);
-                }}
-            />
+            <CustomerServiceOfflineQueue data={data} />
         </CustomerServiceOfflineLayout>
     );
 }

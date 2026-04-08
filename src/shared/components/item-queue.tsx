@@ -167,6 +167,7 @@ const ItemQueueBase = (
 
     const current = getServiceMeta(serviceType);
 
+    const isPending = status === 'Pending';
     const isWaiting = status === 'Menunggu';
     const isProcessing = status === 'Diproses';
 
@@ -214,35 +215,38 @@ const ItemQueueBase = (
                 </div>
             </div>
 
-            <div className="flex gap-2">
-                {isProcessing && (
-                    <button
-                        onClick={onRecall}
-                        disabled={disabled}
-                        className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
-                    >
-                        RE-CALL
-                    </button>
-                )}
+            {/* ACTION AREA */}
+            {!isPending && (
+                <div className="flex gap-2">
+                    {isProcessing && (
+                        <button
+                            onClick={onRecall}
+                            disabled={disabled}
+                            className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
+                        >
+                            RE-CALL
+                        </button>
+                    )}
 
-                {isCustomAction ? (
-                    onAction
-                ) : (
-                    <button
-                        onClick={onAction as () => void}
-                        disabled={disabled}
-                        className={`px-4 py-2 text-[10px] font-black uppercase border transition-all rounded-sm
-                            ${
-                                isWaiting
-                                    ? 'bg-black text-white border-black hover:bg-white hover:text-black'
-                                    : 'border-slate-300 text-black hover:border-black'
-                            }
-                        `}
-                    >
-                        {isWaiting ? 'START PROSES' : 'VIEW DATA'}
-                    </button>
-                )}
-            </div>
+                    {isCustomAction ? (
+                        onAction
+                    ) : (
+                        <button
+                            onClick={onAction as () => void}
+                            disabled={disabled}
+                            className={`px-4 py-2 text-[10px] font-black uppercase border transition-all rounded-sm
+                                ${
+                                    isWaiting
+                                        ? 'bg-black text-white border-black hover:bg-white hover:text-black'
+                                        : 'border-slate-300 text-black hover:border-black'
+                                }
+                            `}
+                        >
+                            {isWaiting ? 'START PROSES' : 'VIEW DATA'}
+                        </button>
+                    )}
+                </div>
+            )}
         </Component>
     );
 };

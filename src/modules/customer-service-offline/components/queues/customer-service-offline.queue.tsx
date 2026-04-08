@@ -1,7 +1,8 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
 
-import { ItemQueue } from '../../../../shared/components';
+import { ItemQueue, Modal } from '../../../../shared/components';
+import CustomerServiceOfflineForm from '../forms/customer-service-offline.form';
 
 /**
  * =========================================================
@@ -16,7 +17,7 @@ type RawQueueItem = {
     queue: number;
     name: string;
     phone: string;
-    status: string; // 🔴 dari API (bebas)
+    status: string;
 };
 
 type QueueItem = {
@@ -32,8 +33,6 @@ type CustomerServiceOfflineQueueListProps = Omit<
     'children'
 > & {
     data: RawQueueItem[];
-    onAction?: (item: QueueItem) => void;
-    onRecall?: (item: QueueItem) => void;
     defaultFilter?: QueueStatus | 'All';
 };
 
@@ -85,18 +84,8 @@ const filterButtonVariants = cva(
 export default function CustomerServiceOfflineQueue(
     props: CustomerServiceOfflineQueueListProps,
 ) {
-    const {
-        data,
-        onAction,
-        onRecall,
-        defaultFilter = 'All',
-        className,
-        ...rest
-    } = props;
+    const { data, defaultFilter = 'All', className, ...rest } = props;
 
-    /**
-     * 🔥 FIX: normalize sekali di sini
-     */
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
             ...item,
@@ -118,7 +107,6 @@ export default function CustomerServiceOfflineQueue(
             className={`w-full flex flex-col gap-4 ${className ?? ''}`}
             {...rest}
         >
-            {/* FILTER */}
             <div className="flex gap-2">
                 {(['All', 'Pending', 'Menunggu', 'Diproses'] as const).map(
                     (item) => (
@@ -151,11 +139,28 @@ export default function CustomerServiceOfflineQueue(
                         name={item.name}
                         phone={item.phone}
                         serviceType="customer-service-offline"
-                        status={
-                            item.status === 'Pending' ? 'Menunggu' : item.status
+                        status={item.status}
+                        onAction={
+                            item.status === 'Menunggu' ? (
+                                <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                                    PROSES
+                                </button>
+                            ) : item.status === 'Diproses' ? (
+                                <Modal
+                                    title="CUSTOMER SERVICE OFFLINE"
+                                    trigger={
+                                        <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                                            DETAIL
+                                        </button>
+                                    }
+                                >
+                                    <CustomerServiceOfflineForm
+                                        id={item.token}
+                                    />
+                                </Modal>
+                            ) : null
                         }
-                        onAction={() => onAction?.(item)}
-                        onRecall={() => onRecall?.(item)}
+                        onRecall={() => ''}
                     />
                 ))}
             </div>

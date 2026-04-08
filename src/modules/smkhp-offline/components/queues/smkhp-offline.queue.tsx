@@ -33,8 +33,6 @@ type SMKHPOfflineQueueListProps = Omit<
     'children'
 > & {
     data: RawQueueItem[];
-    onAction?: (item: QueueItem) => void;
-    onRecall?: (item: QueueItem) => void;
     defaultFilter?: QueueStatus | 'All';
 };
 
@@ -143,26 +141,24 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                         name={item.name}
                         phone={item.phone}
                         serviceType="smkhp-offline"
-                        status={
-                            item.status === 'Pending' ? 'Menunggu' : item.status
-                        }
+                        status={item.status}
                         onAction={
                             item.status === 'Menunggu' ? (
                                 <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
-                                    Proses
+                                    PROSES
                                 </button>
-                            ) : (
+                            ) : item.status === 'Diproses' ? (
                                 <Modal
-                                    title="SMKHP Offline"
+                                    title="CUSTOMER SERVICE OFFLINE"
                                     trigger={
                                         <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
-                                            Detail
+                                            DETAIL
                                         </button>
                                     }
                                 >
                                     <SMKHPOfflineForm id={item.token} />
                                 </Modal>
-                            )
+                            ) : null
                         }
                         onRecall={() => ''}
                     />
