@@ -22,6 +22,7 @@ type BaseProps = {
     disabled?: boolean;
     size?: 'sm' | 'md' | 'lg';
     options: Option[];
+    value?: string | number;
     placeholder?: string;
 };
 
@@ -139,7 +140,7 @@ const SelectInputInner = (
                     {...rest}
                 >
                     {placeholder && (
-                        <option value="" disabled selected>
+                        <option value="" disabled>
                             {placeholder}
                         </option>
                     )}
