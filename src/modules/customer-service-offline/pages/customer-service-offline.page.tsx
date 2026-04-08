@@ -5,25 +5,26 @@ import CustomerServiceOfflineQueue from '../components/queues/customer-service-o
 import useCustomerServiceOfflineStore from '../store';
 
 export default function CustomerServiceOfflinePage() {
-    // 1. Ambil state dan action dari store
     const { customer_service, getCustomerService, isLoading } =
         useCustomerServiceOfflineStore();
 
-    // 2. Lifecycle untuk data realtime
     useEffect(() => {
         const unsubscribe = getCustomerService();
-        return () => unsubscribe(); // Cleanup listener saat unmount
+        return () => unsubscribe();
     }, [getCustomerService]);
 
-    // 3. Kalkulasi statistik dinamis
-    const pendingCount = customer_service.filter(
-        (q) => q.subStatus === 'Pending' || !q.subStatus,
+    const activeQueues = customer_service.filter(
+        (q) => q.subStatus !== 'Selesai',
+    );
+
+    const pendingCount = activeQueues.filter(
+        (q) => q.status === 'inactive',
     ).length;
-    const processingCount = customer_service.filter(
-        (q) => q.subStatus === 'Diproses',
-    ).length;
-    const waitingCount = customer_service.filter(
+    const waitingCount = activeQueues.filter(
         (q) => q.subStatus === 'Menunggu',
+    ).length;
+    const processingCount = activeQueues.filter(
+        (q) => q.subStatus === 'Diproses',
     ).length;
 
     return (
@@ -34,13 +35,13 @@ export default function CustomerServiceOfflinePage() {
                 waiting_counter={waitingCount}
             />
 
-            {isLoading && customer_service.length === 0 && (
+            {isLoading && activeQueues.length === 0 && (
                 <div className="py-4 text-center text-xs text-slate-400 animate-pulse">
                     Sinkronisasi data antrean...
                 </div>
             )}
 
-            <CustomerServiceOfflineQueue data={customer_service} />
+            <CustomerServiceOfflineQueue data={activeQueues} />
         </CustomerServiceOfflineLayout>
     );
 }

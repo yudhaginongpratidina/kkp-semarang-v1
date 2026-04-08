@@ -2,9 +2,7 @@ import { create } from 'zustand';
 import {
     collection,
     onSnapshot,
-    query,
     updateDoc,
-    where,
     doc,
     getDoc,
     setDoc,
@@ -16,6 +14,7 @@ export type SMKHPData = {
     token: string;
     userName: string;
     nomorHp: string;
+    npwp: string;
     status: string;
     subStatus: string;
     queueNo: number;
@@ -72,16 +71,12 @@ const useSMKHPOfflineStore = create<SMKHPOfflineState & SMKHPOfflineAction>(
             }));
         },
 
-        // 1. Ambil Antrean Aktif (Realtime)
+        // 1. Ambil Antrean SMKHP (Realtime)
         getSMKHP: () => {
             set({ isLoading: true });
-            const q = query(
-                collection(db, 'SMKHP'),
-                where('status', '==', 'active'),
-            );
 
             return onSnapshot(
-                q,
+                collection(db, 'SMKHP'),
                 (snap) => {
                     const data = snap.docs.map((doc) => ({
                         token: doc.id,
@@ -90,6 +85,7 @@ const useSMKHPOfflineStore = create<SMKHPOfflineState & SMKHPOfflineAction>(
                             doc.data().userName ||
                             'Tanpa Nama',
                         nomorHp: doc.data().nomorHp || '-',
+                        npwp: doc.data().npwp || '-',
                         status: doc.data().status,
                         subStatus: doc.data().subStatus,
                         queueNo: doc.data().queueNo,

@@ -2,9 +2,7 @@ import { create } from 'zustand';
 import {
     collection,
     onSnapshot,
-    query,
     updateDoc,
-    where,
     doc,
     getDoc,
     setDoc,
@@ -17,6 +15,8 @@ export type CSData = {
     type: string;
     userName: string;
     nomorHp: string;
+    npwp: string;
+    keluhan: string;
     status: string;
     subStatus: string;
     queueNo: number;
@@ -79,16 +79,12 @@ const useCustomerServiceOfflineStore = create<CSState & CSAction>(
             }));
         },
 
-        // 1. Ambil Antrean Customer Service Aktif (Realtime)
+        // 1. Ambil Antrean Customer Service (Realtime)
         getCustomerService: () => {
             set({ isLoading: true });
-            const q = query(
-                collection(db, 'CustomerService'),
-                where('status', '==', 'active'),
-            );
 
             return onSnapshot(
-                q,
+                collection(db, 'CustomerService'),
                 (snap) => {
                     const data = snap.docs.map((doc) => ({
                         token: doc.id,
@@ -98,6 +94,11 @@ const useCustomerServiceOfflineStore = create<CSState & CSAction>(
                             doc.data().userName ||
                             'Tanpa Nama',
                         nomorHp: doc.data().nomorHp || '-',
+                        npwp: doc.data().npwp || '-',
+                        keluhan:
+                            doc.data().keluhan ||
+                            doc.data().details?.keluhan ||
+                            '-',
                         status: doc.data().status,
                         subStatus: doc.data().subStatus,
                         queueNo: doc.data().queueNo,
@@ -129,7 +130,7 @@ const useCustomerServiceOfflineStore = create<CSState & CSAction>(
                             userName: d.userNama || d.userName || 'Tanpa Nama',
                             queueNo: d.queueNo,
                             npwp: d.npwp || '-',
-                            keluhan: details.keluhan || '-',
+                            keluhan: d.keluhan || details.keluhan || '-',
                         },
                     });
                 } else {

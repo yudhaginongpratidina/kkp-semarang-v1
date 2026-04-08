@@ -1,44 +1,76 @@
+import { useEffect, useState } from 'react';
 import { Form, TextInput, Button } from '../../../../shared/components';
+import useSMKHPOfflineStore from '../../store';
+import useGlobalStore from '../../../../shared/stores/global.store';
 
 export default function SMKHPOfflineForm({ id }: { id: string }) {
+    const [catatan, setCatatan] = useState('');
+    const { state: globalUser } = useGlobalStore();
+    const {
+        smkhp_detail,
+        getSMKHPByToken,
+        updateSMKHPHandle,
+        setPetugas,
+        isLoading,
+    } = useSMKHPOfflineStore();
+
+    useEffect(() => {
+        setPetugas(globalUser.full_name, globalUser.nip);
+        void getSMKHPByToken(id);
+    }, [getSMKHPByToken, globalUser.full_name, globalUser.nip, id, setPetugas]);
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        await updateSMKHPHandle(id, catatan);
+    };
+
     return (
-        <Form>
-            <TextInput name="id" label="ID User" value={id} required disabled />
+        <Form onSubmit={handleSubmit}>
             <TextInput
                 name="no_antrian"
-                label="Nomer Antrian"
-                value={1}
+                label="Nomor Antrian"
+                value={smkhp_detail?.queueNo ?? ''}
                 required
                 disabled
             />
             <TextInput
                 name="nama"
                 label="Nama"
-                value="User 1"
+                value={smkhp_detail?.userName ?? ''}
                 required
                 disabled
             />
             <TextInput
                 name="no_npwp"
-                label="Nomer NPWP"
-                value="00.100.169.1-305.7000"
+                label="Nomor NPWP"
+                value={smkhp_detail?.npwp ?? ''}
                 required
                 disabled
             />
             <TextInput
                 name="nama_petugas"
                 label="Nama Petugas"
-                value="petugas 1"
+                value={globalUser.full_name}
+                required
+                disabled
+            />
+            <TextInput
+                name="nip_petugas"
+                label="NIP Petugas"
+                value={globalUser.nip}
                 required
                 disabled
             />
             <TextInput
                 name="catatan_petugas"
                 label="Catatan Petugas"
-                value="catatan petugas 1"
+                value={catatan}
+                onChange={(e) => setCatatan(e.target.value)}
                 required
             />
-            <Button>Submit dan Selesaikan</Button>
+            <Button type="submit" disabled={isLoading}>
+                {isLoading ? 'Memproses...' : 'Submit dan Selesaikan'}
+            </Button>
         </Form>
     );
 }

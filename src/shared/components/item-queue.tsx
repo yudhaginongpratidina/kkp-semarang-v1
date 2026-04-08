@@ -3,12 +3,6 @@ import { cva, type VariantProps } from 'class-variance-authority';
 
 import { FaMobileAlt, FaHeadset } from 'react-icons/fa';
 
-/**
- * =========================================================
- * TYPES
- * =========================================================
- */
-
 type ServiceType =
     | 'smkhp-offline'
     | 'smkhp-online'
@@ -21,19 +15,13 @@ type BaseProps = {
     token: string;
     queue: number;
     name: string;
-    phone: string;
+    subtitle: string;
     serviceType: ServiceType;
     status: QueueStatus;
     onAction?: (() => void) | React.ReactNode;
     onRecall?: () => void;
     disabled?: boolean;
 };
-
-/**
- * =========================================================
- * POLYMORPHIC TYPES
- * =========================================================
- */
 
 type AsProp<T extends React.ElementType> = {
     as?: T;
@@ -59,12 +47,6 @@ type ItemQueueComponent = <T extends React.ElementType = 'div'>(
         ref?: PolymorphicRef<T>;
     },
 ) => React.ReactElement | null;
-
-/**
- * =========================================================
- * VARIANTS
- * =========================================================
- */
 
 const containerVariants = cva(
     'relative flex items-center justify-between border p-3 transition-all overflow-hidden group rounded-sm',
@@ -95,12 +77,6 @@ const badgeVariants = cva(
         },
     },
 );
-
-/**
- * =========================================================
- * SERVICE CONFIG
- * =========================================================
- */
 
 const baseServiceConfig = {
     smkhp: {
@@ -137,12 +113,6 @@ const getServiceMeta = (type: ServiceType) => {
     };
 };
 
-/**
- * =========================================================
- * COMPONENT
- * =========================================================
- */
-
 const ItemQueueBase = (
     props: PolymorphicComponentProps<
         'div',
@@ -154,7 +124,7 @@ const ItemQueueBase = (
         as: Component = 'div',
         queue,
         name,
-        phone,
+        subtitle,
         serviceType,
         status,
         onAction,
@@ -170,7 +140,6 @@ const ItemQueueBase = (
     const isPending = status === 'Pending';
     const isWaiting = status === 'Menunggu';
     const isProcessing = status === 'Diproses';
-
     const isCustomAction = React.isValidElement(onAction);
 
     return (
@@ -197,17 +166,15 @@ const ItemQueueBase = (
                         {name}
                     </h4>
 
-                    <p className="text-[10px] font-bold text-slate-400 mb-2">
-                        {phone}
+                    <p className="text-[10px] font-bold text-slate-400 mb-2 truncate">
+                        {subtitle}
                     </p>
 
                     <div className="flex gap-1">
                         <span className={badgeVariants()}>{current.label}</span>
-
                         <span className={badgeVariants({ variant: 'muted' })}>
                             {status}
                         </span>
-
                         <span className={badgeVariants({ variant: 'muted' })}>
                             {current.channel}
                         </span>
@@ -215,46 +182,40 @@ const ItemQueueBase = (
                 </div>
             </div>
 
-            {/* ACTION AREA */}
-            {!isPending && (
-                <div className="flex gap-2">
-                    {isProcessing && (
-                        <button
-                            onClick={onRecall}
-                            disabled={disabled}
-                            className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
-                        >
-                            RE-CALL
-                        </button>
-                    )}
+            <div className="flex gap-2">
+                {isPending && isCustomAction && onAction}
+                {!isPending && (
+                    <>
+                        {isProcessing && (
+                            <button
+                                onClick={onRecall}
+                                disabled={disabled}
+                                className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
+                            >
+                                RE-CALL
+                            </button>
+                        )}
 
-                    {isCustomAction ? (
-                        onAction
-                    ) : (
-                        <button
-                            onClick={onAction as () => void}
-                            disabled={disabled}
-                            className={`px-4 py-2 text-[10px] font-black uppercase border transition-all rounded-sm
-                                ${
+                        {isCustomAction ? (
+                            onAction
+                        ) : (
+                            <button
+                                onClick={onAction as () => void}
+                                disabled={disabled}
+                                className={`px-4 py-2 text-[10px] font-black uppercase border transition-all rounded-sm ${
                                     isWaiting
                                         ? 'bg-black text-white border-black hover:bg-white hover:text-black'
                                         : 'border-slate-300 text-black hover:border-black'
-                                }
-                            `}
-                        >
-                            {isWaiting ? 'START PROSES' : 'VIEW DATA'}
-                        </button>
-                    )}
-                </div>
-            )}
+                                }`}
+                            >
+                                {isWaiting ? 'START PROSES' : 'VIEW DATA'}
+                            </button>
+                        )}
+                    </>
+                )}
+            </div>
         </Component>
     );
 };
-
-/**
- * =========================================================
- * EXPORT
- * =========================================================
- */
 
 export const ItemQueue = React.forwardRef(ItemQueueBase) as ItemQueueComponent;

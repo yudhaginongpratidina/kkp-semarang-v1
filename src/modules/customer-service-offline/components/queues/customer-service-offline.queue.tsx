@@ -4,18 +4,13 @@ import { ItemQueue, Modal } from '../../../../shared/components';
 import CustomerServiceOfflineForm from '../forms/customer-service-offline.form';
 import useCustomerServiceOfflineStore, { type CSData } from '../../store';
 
-/**
- * =========================================================
- * TYPES
- * =========================================================
- */
 type QueueStatus = 'Pending' | 'Menunggu' | 'Diproses';
 
 type QueueItem = {
     token: string;
     queue: number;
     name: string;
-    phone: string;
+    subtitle: string;
     status: QueueStatus;
 };
 
@@ -23,29 +18,15 @@ type CustomerServiceOfflineQueueListProps = Omit<
     React.ComponentPropsWithoutRef<'div'>,
     'children'
 > & {
-    data: CSData[]; // Ganti ke tipe data store
+    data: CSData[];
     defaultFilter?: QueueStatus | 'All';
 };
 
-/**
- * =========================================================
- * NORMALIZER
- * =========================================================
- */
-const normalizeStatus = (status: string): QueueStatus => {
-    switch (status?.toLowerCase()) {
-        case 'pending':
-            return 'Pending';
-        case 'menunggu':
-        case 'waiting':
-            return 'Menunggu';
-        case 'diproses':
-        case 'processing':
-        case 'dipanggil':
-            return 'Diproses';
-        default:
-            return 'Pending';
-    }
+const normalizeStatus = (item: CSData): QueueStatus => {
+    if (item.status === 'inactive') return 'Pending';
+    if (item.subStatus === 'Menunggu') return 'Menunggu';
+    if (item.subStatus === 'Diproses') return 'Diproses';
+    return 'Pending';
 };
 
 const filterButtonVariants = cva(
@@ -64,18 +45,15 @@ export default function CustomerServiceOfflineQueue(
     props: CustomerServiceOfflineQueueListProps,
 ) {
     const { data, defaultFilter = 'All', className, ...rest } = props;
-
-    // Ambil action update status dari store
     const { updateCustomerServiceStatus } = useCustomerServiceOfflineStore();
 
-    // Map data Firebase ke struktur UI ItemQueue
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
             token: item.token,
             queue: item.queueNo,
             name: item.userName,
-            phone: item.nomorHp,
-            status: normalizeStatus(item.subStatus),
+            subtitle: `NPWP: ${item.npwp || '-'}`,
+            status: normalizeStatus(item),
         }));
     }, [data]);
 
@@ -122,12 +100,23 @@ export default function CustomerServiceOfflineQueue(
                         token={item.token}
                         queue={item.queue}
                         name={item.name}
-                        phone={item.phone}
+                        subtitle={item.subtitle}
                         serviceType="customer-service-offline"
                         status={item.status}
                         onAction={
-                            item.status === 'Menunggu' ||
                             item.status === 'Pending' ? (
+                                <button
+                                    onClick={() =>
+                                        updateCustomerServiceStatus(
+                                            item.token,
+                                            'Menunggu',
+                                        )
+                                    }
+                                    className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
+                                >
+                                    AKTIFKAN
+                                </button>
+                            ) : item.status === 'Menunggu' ? (
                                 <button
                                     onClick={() =>
                                         updateCustomerServiceStatus(
@@ -154,7 +143,9 @@ export default function CustomerServiceOfflineQueue(
                                 </Modal>
                             ) : null
                         }
-                        onRecall={() => ''}
+                        onRecall={() =>
+                            updateCustomerServiceStatus(item.token, 'Menunggu')
+                        }
                     />
                 ))}
             </div>

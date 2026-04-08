@@ -6,20 +6,13 @@ import SMKHPOfflineForm from '../forms/smkhp-offline.form';
 
 import useSMKHPOfflineStore, { type SMKHPData } from '../../store';
 
-/**
- * =========================================================
- * TYPES
- * =========================================================
- */
-
 type QueueStatus = 'Pending' | 'Menunggu' | 'Diproses';
 
-// Sesuai dengan interface SMKHPData dari store
 type QueueItem = {
     token: string;
     queue: number;
     name: string;
-    phone: string;
+    subtitle: string;
     status: QueueStatus;
 };
 
@@ -27,30 +20,15 @@ type SMKHPOfflineQueueListProps = Omit<
     React.ComponentPropsWithoutRef<'div'>,
     'children'
 > & {
-    data: SMKHPData[]; // Gunakan tipe data dari Firebase
+    data: SMKHPData[];
     defaultFilter?: QueueStatus | 'All';
 };
 
-/**
- * =========================================================
- * NORMALIZER
- * =========================================================
- */
-
-const normalizeStatus = (status: string): QueueStatus => {
-    switch (status?.toLowerCase()) {
-        case 'pending':
-            return 'Pending';
-        case 'menunggu':
-        case 'waiting':
-            return 'Menunggu';
-        case 'diproses':
-        case 'dipanggil':
-        case 'processing':
-            return 'Diproses';
-        default:
-            return 'Pending';
-    }
+const normalizeStatus = (item: SMKHPData): QueueStatus => {
+    if (item.status === 'inactive') return 'Pending';
+    if (item.subStatus === 'Menunggu') return 'Menunggu';
+    if (item.subStatus === 'Diproses') return 'Diproses';
+    return 'Pending';
 };
 
 const filterButtonVariants = cva(
@@ -65,28 +43,17 @@ const filterButtonVariants = cva(
     },
 );
 
-/**
- * =========================================================
- * COMPONENT
- * =========================================================
- */
-
 export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
     const { data, defaultFilter = 'All', className, ...rest } = props;
-
-    // Ambil aksi dari store
     const { updateSMKHPStatus } = useSMKHPOfflineStore();
 
-    /**
-     * 🔥 MAPPING DATA FIREBASE KE UI
-     */
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
             token: item.token,
-            queue: item.queueNo, // Firebase: queueNo
-            name: item.userName, // Firebase: userName
-            phone: item.nomorHp, // Firebase: nomorHp
-            status: normalizeStatus(item.subStatus || 'Pending'), // Firebase: subStatus
+            queue: item.queueNo,
+            name: item.userName,
+            subtitle: `NPWP: ${item.npwp || '-'}`,
+            status: normalizeStatus(item),
         }));
     }, [data]);
 
@@ -104,7 +71,6 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
             className={`w-full flex flex-col gap-4 ${className ?? ''}`}
             {...rest}
         >
-            {/* FILTER */}
             <div className="flex gap-2">
                 {(['All', 'Pending', 'Menunggu', 'Diproses'] as const).map(
                     (item) => (
@@ -121,7 +87,6 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                 )}
             </div>
 
-            {/* LIST */}
             <div className="flex flex-col gap-3">
                 {filteredData.length === 0 && (
                     <div className="text-[12px] font-bold text-slate-400 text-center py-6 border border-slate-200 rounded-sm">
@@ -135,12 +100,23 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                         token={item.token}
                         queue={item.queue}
                         name={item.name}
-                        phone={item.phone}
+                        subtitle={item.subtitle}
                         serviceType="smkhp-offline"
                         status={item.status}
                         onAction={
-                            item.status === 'Menunggu' ||
                             item.status === 'Pending' ? (
+                                <button
+                                    onClick={() =>
+                                        updateSMKHPStatus(
+                                            item.token,
+                                            'Menunggu',
+                                        )
+                                    }
+                                    className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
+                                >
+                                    AKTIFKAN
+                                </button>
+                            ) : item.status === 'Menunggu' ? (
                                 <button
                                     onClick={() =>
                                         updateSMKHPStatus(
@@ -165,7 +141,9 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                                 </Modal>
                             ) : null
                         }
-                        onRecall={() => ''}
+                        onRecall={() =>
+                            updateSMKHPStatus(item.token, 'Menunggu')
+                        }
                     />
                 ))}
             </div>

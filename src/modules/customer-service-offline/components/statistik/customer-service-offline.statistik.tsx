@@ -17,21 +17,21 @@ export default function CustomerServiceOfflineStatistik({
         <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-4">
             <Stat
                 icon={<MdOutlinePendingActions size={24} />}
-                label="Pending Approval"
+                label="Pending"
                 value={pending_counter}
-                description="Tiket yang menunggu persetujuan"
+                description="Antrean dengan status inactive"
             />
             <Stat
                 icon={<MdAccessTime size={24} />}
                 label="Menunggu Respons"
                 value={waiting_counter}
-                description="Tiket yang belum ditindaklanjuti"
+                description="Antrean dengan subStatus Menunggu"
             />
             <Stat
                 icon={<MdAutorenew size={24} />}
                 label="Sedang Diproses"
                 value={processing_counter}
-                description="Tiket yang sedang ditangani"
+                description="Antrean dengan subStatus Diproses"
             />
         </div>
     );
