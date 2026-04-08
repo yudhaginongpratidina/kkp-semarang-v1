@@ -116,11 +116,12 @@ const baseServiceConfig = {
 } as const;
 
 const parseService = (type: ServiceType) => {
-    const [service, channel] = type.split('-') as [
-        keyof typeof baseServiceConfig,
-        'offline' | 'online',
-    ];
-
+    const isOffline = type.endsWith('-offline');
+    const channel = isOffline ? 'offline' : 'online';
+    const service = type.replace(
+        /-(offline|online)$/,
+        '',
+    ) as keyof typeof baseServiceConfig;
     return { service, channel };
 };
 

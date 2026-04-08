@@ -31,6 +31,7 @@ export default function MainMenuList() {
             />
 
             <MenuItem
+                href="/customer-service-offline"
                 title="Customer Service"
                 description="Layanan untuk membantu pengajuan SMKHP bagi yang belum memilikinya"
                 icon={<IoIosHeadset size={32} className="text-black" />}

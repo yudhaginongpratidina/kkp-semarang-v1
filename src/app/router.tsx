@@ -10,6 +10,7 @@ import HistoryRoutesWithSkeleton from '../modules/history/routes';
 import TerminalRoutesWithSkeleton from '../modules/terminal/routes';
 
 import SMKHPOfflineRoutesWithSkeleton from '../modules/smkhp-offline/routes';
+import CustomerServiceOfflineRoutesWithSkeleton from '../modules/customer-service-offline/routes';
 
 // main router
 export const router = createBrowserRouter([
@@ -40,5 +41,9 @@ export const router = createBrowserRouter([
     {
         path: '/smkhp-offline/*',
         Component: SMKHPOfflineRoutesWithSkeleton,
+    },
+    {
+        path: '/customer-service-offline/*',
+        Component: CustomerServiceOfflineRoutesWithSkeleton,
     },
 ]);
