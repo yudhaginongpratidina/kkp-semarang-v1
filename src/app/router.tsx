@@ -6,6 +6,7 @@ import AuthRoutesWithSkeleton from '../modules/auth/routes';
 import MenuRoutesWithSkeleton from '../modules/menu/routes';
 import OfficerRoutesWithSkeleton from '../modules/officer/routes';
 import TraderRoutesWithSkeleton from '../modules/trader/routes';
+import HistoryRoutesWithSkeleton from '../modules/history/routes';
 
 // main router
 export const router = createBrowserRouter([
@@ -24,5 +25,9 @@ export const router = createBrowserRouter([
     {
         path: '/traders/*',
         Component: TraderRoutesWithSkeleton,
+    },
+    {
+        path: '/history/*',
+        Component: HistoryRoutesWithSkeleton,
     },
 ]);

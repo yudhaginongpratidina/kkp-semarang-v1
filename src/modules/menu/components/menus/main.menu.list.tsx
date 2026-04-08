@@ -61,6 +61,7 @@ export default function MainMenuList() {
             />
 
             <MenuItem
+                href="/history"
                 title="History"
                 description="Riwayat pengajuan, pemeriksaan, dan sertifikasi produk perikanan"
                 icon={<IoIosTime size={32} className="text-black" />}
