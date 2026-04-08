@@ -4,6 +4,8 @@ import { cva } from 'class-variance-authority';
 import { ItemQueue, Modal } from '../../../../shared/components';
 import SMKHPOfflineForm from '../forms/smkhp-offline.form';
 
+import useSMKHPOfflineStore, { type SMKHPData } from '../../store';
+
 /**
  * =========================================================
  * TYPES
@@ -12,14 +14,7 @@ import SMKHPOfflineForm from '../forms/smkhp-offline.form';
 
 type QueueStatus = 'Pending' | 'Menunggu' | 'Diproses';
 
-type RawQueueItem = {
-    token: string;
-    queue: number;
-    name: string;
-    phone: string;
-    status: string;
-};
-
+// Sesuai dengan interface SMKHPData dari store
 type QueueItem = {
     token: string;
     queue: number;
@@ -32,36 +27,31 @@ type SMKHPOfflineQueueListProps = Omit<
     React.ComponentPropsWithoutRef<'div'>,
     'children'
 > & {
-    data: RawQueueItem[];
+    data: SMKHPData[]; // Gunakan tipe data dari Firebase
     defaultFilter?: QueueStatus | 'All';
 };
 
 /**
  * =========================================================
- * NORMALIZER (FIX UTAMA)
+ * NORMALIZER
  * =========================================================
  */
 
 const normalizeStatus = (status: string): QueueStatus => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
         case 'pending':
             return 'Pending';
         case 'menunggu':
         case 'waiting':
             return 'Menunggu';
         case 'diproses':
+        case 'dipanggil':
         case 'processing':
             return 'Diproses';
         default:
             return 'Pending';
     }
 };
-
-/**
- * =========================================================
- * VARIANTS
- * =========================================================
- */
 
 const filterButtonVariants = cva(
     'px-3 py-2 text-[10px] font-black uppercase border rounded-sm transition-all',
@@ -84,13 +74,19 @@ const filterButtonVariants = cva(
 export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
     const { data, defaultFilter = 'All', className, ...rest } = props;
 
+    // Ambil aksi dari store
+    const { updateSMKHPStatus } = useSMKHPOfflineStore();
+
     /**
-     * 🔥 FIX: normalize sekali di sini
+     * 🔥 MAPPING DATA FIREBASE KE UI
      */
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
-            ...item,
-            status: normalizeStatus(item.status),
+            token: item.token,
+            queue: item.queueNo, // Firebase: queueNo
+            name: item.userName, // Firebase: userName
+            phone: item.nomorHp, // Firebase: nomorHp
+            status: normalizeStatus(item.subStatus || 'Pending'), // Firebase: subStatus
         }));
     }, [data]);
 
@@ -143,13 +139,22 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                         serviceType="smkhp-offline"
                         status={item.status}
                         onAction={
-                            item.status === 'Menunggu' ? (
-                                <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                            item.status === 'Menunggu' ||
+                            item.status === 'Pending' ? (
+                                <button
+                                    onClick={() =>
+                                        updateSMKHPStatus(
+                                            item.token,
+                                            'Diproses',
+                                        )
+                                    }
+                                    className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
+                                >
                                     PROSES
                                 </button>
                             ) : item.status === 'Diproses' ? (
                                 <Modal
-                                    title="CUSTOMER SERVICE OFFLINE"
+                                    title="DETAIL ANTREAN SMKHP"
                                     trigger={
                                         <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
                                             DETAIL

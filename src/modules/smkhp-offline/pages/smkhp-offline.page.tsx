@@ -1,41 +1,45 @@
+import { useEffect } from 'react';
 import SMKHPOfflineLayout from '../layouts/smkhp-offline.layout';
-
 import SMKHPOfflineStatistik from '../components/statistik/smkhp-offline.statistik';
 import SMKHPOfflineQueue from '../components/queues/smkhp-offline.queue';
-
-const data = [
-    {
-        token: '1',
-        queue: 1,
-        name: 'Yudha',
-        phone: '08123',
-        status: 'pending',
-    },
-    {
-        token: '2',
-        queue: 2,
-        name: 'Budi',
-        phone: '08222',
-        status: 'menunggu',
-    },
-    {
-        token: '3',
-        queue: 3,
-        name: 'Siti',
-        phone: '08333',
-        status: 'diproses',
-    },
-];
+import useSMKHPOfflineStore from '../store';
 
 export default function SMKHPOfflinePage() {
+    // 1. Ambil state dan action dari store
+    const { smkhp, getSMKHP, isLoading } = useSMKHPOfflineStore();
+
+    // 2. Berlangganan ke data Firestore secara realtime saat komponen dimuat
+    useEffect(() => {
+        const unsubscribe = getSMKHP();
+
+        // Cleanup: Berhenti berlangganan saat user meninggalkan halaman
+        return () => unsubscribe();
+    }, [getSMKHP]);
+
+    // 3. Kalkulasi data statistik secara dinamis berdasarkan subStatus
+    const pendingCount = smkhp.filter(
+        (q) => q.status === 'Pending' || !q.subStatus,
+    ).length;
+    const processingCount = smkhp.filter(
+        (q) => q.subStatus === 'Dipanggil',
+    ).length;
+    const waitingCount = smkhp.filter((q) => q.subStatus === 'Diproses').length;
+
     return (
         <SMKHPOfflineLayout>
             <SMKHPOfflineStatistik
-                pending_counter={0}
-                processing_counter={0}
-                waiting_counter={0}
+                pending_counter={pendingCount}
+                processing_counter={processingCount}
+                waiting_counter={waitingCount}
             />
-            <SMKHPOfflineQueue data={data} />
+
+            {/* Indikator Loading sederhana */}
+            {isLoading && smkhp.length === 0 && (
+                <div className="py-4 text-center text-sm text-gray-500 italic">
+                    Menghubungkan ke server antrean...
+                </div>
+            )}
+            <SMKHPOfflineQueue data={smkhp} />
         </SMKHPOfflineLayout>
     );
 }

@@ -1,24 +1,15 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
-
 import { ItemQueue, Modal } from '../../../../shared/components';
 import CustomerServiceOfflineForm from '../forms/customer-service-offline.form';
+import useCustomerServiceOfflineStore, { type CSData } from '../../store';
 
 /**
  * =========================================================
  * TYPES
  * =========================================================
  */
-
 type QueueStatus = 'Pending' | 'Menunggu' | 'Diproses';
-
-type RawQueueItem = {
-    token: string;
-    queue: number;
-    name: string;
-    phone: string;
-    status: string;
-};
 
 type QueueItem = {
     token: string;
@@ -32,18 +23,17 @@ type CustomerServiceOfflineQueueListProps = Omit<
     React.ComponentPropsWithoutRef<'div'>,
     'children'
 > & {
-    data: RawQueueItem[];
+    data: CSData[]; // Ganti ke tipe data store
     defaultFilter?: QueueStatus | 'All';
 };
 
 /**
  * =========================================================
- * NORMALIZER (FIX UTAMA)
+ * NORMALIZER
  * =========================================================
  */
-
 const normalizeStatus = (status: string): QueueStatus => {
-    switch (status.toLowerCase()) {
+    switch (status?.toLowerCase()) {
         case 'pending':
             return 'Pending';
         case 'menunggu':
@@ -51,17 +41,12 @@ const normalizeStatus = (status: string): QueueStatus => {
             return 'Menunggu';
         case 'diproses':
         case 'processing':
+        case 'dipanggil':
             return 'Diproses';
         default:
             return 'Pending';
     }
 };
-
-/**
- * =========================================================
- * VARIANTS
- * =========================================================
- */
 
 const filterButtonVariants = cva(
     'px-3 py-2 text-[10px] font-black uppercase border rounded-sm transition-all',
@@ -75,21 +60,22 @@ const filterButtonVariants = cva(
     },
 );
 
-/**
- * =========================================================
- * COMPONENT
- * =========================================================
- */
-
 export default function CustomerServiceOfflineQueue(
     props: CustomerServiceOfflineQueueListProps,
 ) {
     const { data, defaultFilter = 'All', className, ...rest } = props;
 
+    // Ambil action update status dari store
+    const { updateCustomerServiceStatus } = useCustomerServiceOfflineStore();
+
+    // Map data Firebase ke struktur UI ItemQueue
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
-            ...item,
-            status: normalizeStatus(item.status),
+            token: item.token,
+            queue: item.queueNo,
+            name: item.userName,
+            phone: item.nomorHp,
+            status: normalizeStatus(item.subStatus),
         }));
     }, [data]);
 
@@ -123,11 +109,10 @@ export default function CustomerServiceOfflineQueue(
                 )}
             </div>
 
-            {/* LIST */}
             <div className="flex flex-col gap-3">
                 {filteredData.length === 0 && (
                     <div className="text-[12px] font-bold text-slate-400 text-center py-6 border border-slate-200 rounded-sm">
-                        Tidak ada data
+                        Tidak ada antrean dalam kategori ini
                     </div>
                 )}
 
@@ -141,8 +126,17 @@ export default function CustomerServiceOfflineQueue(
                         serviceType="customer-service-offline"
                         status={item.status}
                         onAction={
-                            item.status === 'Menunggu' ? (
-                                <button className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm">
+                            item.status === 'Menunggu' ||
+                            item.status === 'Pending' ? (
+                                <button
+                                    onClick={() =>
+                                        updateCustomerServiceStatus(
+                                            item.token,
+                                            'Diproses',
+                                        )
+                                    }
+                                    className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
+                                >
                                     PROSES
                                 </button>
                             ) : item.status === 'Diproses' ? (
