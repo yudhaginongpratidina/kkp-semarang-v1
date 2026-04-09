@@ -112,7 +112,7 @@ export default function CustomerServiceOnlineQueue(
                         token={item.token}
                         queue={item.queue}
                         name={item.name}
-                        phone={item.phone}
+                        subtitle={item.phone}
                         serviceType="customer-service-online"
                         status={item.status}
                         onAction={

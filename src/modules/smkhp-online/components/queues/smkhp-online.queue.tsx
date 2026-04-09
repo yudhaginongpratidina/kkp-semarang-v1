@@ -110,7 +110,7 @@ export default function SMKHPOnlineQueue(props: SMKHPOnlineQueueListProps) {
                         token={item.token}
                         queue={item.queue}
                         name={item.name}
-                        phone={item.phone}
+                        subtitle={item.phone}
                         serviceType="smkhp-online"
                         status={item.status}
                         onAction={

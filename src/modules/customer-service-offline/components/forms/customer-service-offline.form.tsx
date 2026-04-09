@@ -78,7 +78,10 @@ export default function CustomerServiceOfflineForm({ id }: { id: string }) {
                 name="catatan_petugas"
                 label="Catatan Petugas"
                 value={catatan}
-                onChange={(e) => setCatatan(e.target.value)}
+                onChange={(e) => {
+                    const target = e.target as HTMLInputElement;
+                    setCatatan(target.value);
+                }}
                 required
             />
             <Button type="submit" disabled={isLoading}>
