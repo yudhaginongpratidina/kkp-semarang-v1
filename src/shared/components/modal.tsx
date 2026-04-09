@@ -112,7 +112,9 @@ const ModalInner = <T extends React.ElementType = 'div'>(
                         </div>
 
                         {/* Body */}
-                        <div>{children}</div>
+                        <div className="max-h-[70vh] overflow-y-auto">
+                            {children}
+                        </div>
                     </div>
                 </div>
             )}

@@ -1,142 +1,117 @@
-import { useState } from 'react';
+import * as React from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Modal, Table, MenuTab } from '../../../../shared/components';
+import useLaboratoriumUmumStore from '../../../laboratorium-umum/store';
+import useLaboratoriumCStore from '../../../laboratorium-c/store';
+import type { LabHistoryItem } from '../../../laboratory-shared/lab.types';
+import LabReportView from '../../../laboratory-shared/components/lab-report.view';
+import { formatCurrency } from '../../../laboratory-shared/lab.utils';
 
-type History = {
-    id: string;
-    nama: string;
-    phone: string;
-    npwp: string;
-};
+type HistoryTab = 'lab-umum' | 'lab-c';
 
 export default function HistroyTable() {
     const tabs = [
-        { label: 'SMKHP Offline', value: 'smkhp-offline' },
-        { label: 'SMKHP Online', value: 'smkhp-online' },
-        { label: 'CS Offline', value: 'customer-service-offline' },
-        { label: 'CS Online', value: 'customer-service-online' },
+        { label: 'History Lab Umum', value: 'lab-umum' },
+        { label: 'History Lab C', value: 'lab-c' },
     ];
+    const [activeTab, setActiveTab] = React.useState<HistoryTab>('lab-umum');
+    const [selectedItem, setSelectedItem] =
+        React.useState<LabHistoryItem | null>(null);
+    const { histories: historiesUmum, getHistories: getHistoriesUmum } =
+        useLaboratoriumUmumStore();
+    const { histories: historiesC, getHistories: getHistoriesC } =
+        useLaboratoriumCStore();
 
-    // State per row
-    const [activeMap, setActiveMap] = useState<Record<string, string>>({});
-    const [historyModalOpenMap, setHistoryModalOpenMap] = useState<
-        Record<string, boolean>
-    >({});
-    const [editModalOpenMap, setEditModalOpenMap] = useState<
-        Record<string, boolean>
-    >({});
+    React.useEffect(() => {
+        const unsubscribeUmum = getHistoriesUmum();
+        const unsubscribeC = getHistoriesC();
 
-    const columns: ColumnDef<History>[] = [
+        return () => {
+            unsubscribeUmum();
+            unsubscribeC();
+        };
+    }, [getHistoriesC, getHistoriesUmum]);
+
+    const data = React.useMemo(
+        () => (activeTab === 'lab-umum' ? historiesUmum : historiesC),
+        [activeTab, historiesC, historiesUmum],
+    );
+
+    const columns: ColumnDef<LabHistoryItem>[] = [
         {
-            accessorKey: 'nama',
-            header: 'Nama',
+            accessorKey: 'lpp',
+            header: 'LPP',
             enableColumnFilter: true,
         },
         {
-            accessorKey: 'phone',
-            header: 'Phone',
+            accessorKey: 'namaSampel',
+            header: 'Nama Sampel',
             enableColumnFilter: true,
         },
         {
-            accessorKey: 'npwp',
-            header: 'NPWP',
+            accessorKey: 'tanggalPenerbitan',
+            header: 'Tanggal Penerbitan',
             enableColumnFilter: true,
         },
         {
-            accessorKey: 'action',
+            accessorKey: 'namaPenanggungJawab',
+            header: 'Penanggung Jawab',
+            enableColumnFilter: true,
+        },
+        {
+            accessorKey: 'totalTarif',
+            header: 'Total Tarif',
+            enableColumnFilter: false,
+            cell: ({ row }) => formatCurrency(row.original.totalTarif),
+        },
+        {
+            accessorKey: 'status',
+            header: 'Status',
+            enableColumnFilter: true,
+        },
+        {
+            id: 'action',
             header: 'Action',
             enableColumnFilter: false,
-            cell: ({ row }) => {
-                const current = activeMap[row.original.id] ?? 'smkhp-offline';
-                const isHistoryModalOpen =
-                    historyModalOpenMap[row.original.id] ?? false;
-                const isEditModalOpen =
-                    editModalOpenMap[row.original.id] ?? false;
-
-                return (
-                    <div className="flex items-center gap-2">
-                        <Modal
-                            title="Riwayat"
-                            open={isHistoryModalOpen}
-                            onOpenChange={(open) =>
-                                setHistoryModalOpenMap((prev) => ({
-                                    ...prev,
-                                    [row.original.id]: open,
-                                }))
-                            }
-                            trigger={
-                                <button className="hover:cursor-pointer">
-                                    Riwayat
-                                </button>
-                            }
-                        >
-                            <div
-                                onClick={(e) => e.stopPropagation()}
-                                onMouseDown={(e) => e.stopPropagation()}
-                            >
-                                <MenuTab
-                                    tabs={tabs}
-                                    value={current}
-                                    onChange={(val) =>
-                                        setActiveMap((prev) => ({
-                                            ...prev,
-                                            [row.original.id]: val,
-                                        }))
-                                    }
-                                />
-
-                                {current === 'smkhp-offline' && (
-                                    <p>SMKHP Offline {row.original.id}</p>
-                                )}
-                                {current === 'smkhp-online' && (
-                                    <p>SMKHP Online {row.original.id}</p>
-                                )}
-                                {current === 'customer-service-offline' && (
-                                    <p>CS Offline {row.original.id}</p>
-                                )}
-                                {current === 'customer-service-online' && (
-                                    <p>CS Online {row.original.id}</p>
-                                )}
-                            </div>
-                        </Modal>
-                        <span>|</span>
-                        <Modal
-                            title="Edit"
-                            open={isEditModalOpen}
-                            onOpenChange={(open) =>
-                                setEditModalOpenMap((prev) => ({
-                                    ...prev,
-                                    [row.original.id]: open,
-                                }))
-                            }
-                            trigger={
-                                <button className="hover:cursor-pointer">
-                                    Edit
-                                </button>
-                            }
-                        >
-                            <div
-                                onClick={(e) => e.stopPropagation()}
-                                onMouseDown={(e) => e.stopPropagation()}
-                            >
-                                <p>Edit {row.original.id}</p>
-                            </div>
-                        </Modal>
-
-                        <span>|</span>
-
-                        <button className="hover:cursor-pointer">Hapus</button>
-                    </div>
-                );
-            },
+            cell: ({ row }) => (
+                <button
+                    className="hover:cursor-pointer font-bold"
+                    onClick={() => setSelectedItem(row.original)}
+                >
+                    View
+                </button>
+            ),
         },
     ];
 
-    const data: History[] = [
-        { id: '1', nama: 'Yudha', phone: '1', npwp: '1' },
-        { id: '2', nama: 'Budi', phone: '2', npwp: '2' },
-        { id: '3', nama: 'Andi', phone: '3', npwp: '3' },
-    ];
+    return (
+        <div className="space-y-4">
+            <MenuTab
+                tabs={tabs}
+                value={activeTab}
+                onChange={(value) => setActiveTab(value as HistoryTab)}
+            />
 
-    return <Table columns={columns} data={data} />;
+            <Table columns={columns} data={data} />
+
+            <Modal
+                title="VIEW LHU HISTORY LAB"
+                open={!!selectedItem}
+                onOpenChange={(open) => {
+                    if (!open) setSelectedItem(null);
+                }}
+            >
+                {selectedItem && (
+                    <LabReportView
+                        item={selectedItem}
+                        title={
+                            activeTab === 'lab-umum'
+                                ? 'Laboratorium Umum'
+                                : 'Laboratorium C'
+                        }
+                    />
+                )}
+            </Modal>
+        </div>
+    );
 }

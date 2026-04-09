@@ -13,6 +13,8 @@ import SMKHPOfflineRoutesWithSkeleton from '../modules/smkhp-offline/routes';
 import CustomerServiceOfflineRoutesWithSkeleton from '../modules/customer-service-offline/routes';
 import SMKHPOnlineRoutesWithSkeleton from '../modules/smkhp-online/routes';
 import CustomerServiceOnlineRoutesWithSkeleton from '../modules/customer-service-online/routes';
+import LaboratoriumUmumRoutesWithSkeleton from '../modules/laboratorium-umum/routes';
+import LaboratoriumCRoutesWithSkeleton from '../modules/laboratorium-c/routes';
 
 // main router
 export const router = createBrowserRouter([
@@ -55,5 +57,13 @@ export const router = createBrowserRouter([
     {
         path: '/customer-service-online/*',
         Component: CustomerServiceOnlineRoutesWithSkeleton,
+    },
+    {
+        path: '/laboratorium-umum/*',
+        Component: LaboratoriumUmumRoutesWithSkeleton,
+    },
+    {
+        path: '/laboratorium-c/*',
+        Component: LaboratoriumCRoutesWithSkeleton,
     },
 ]);

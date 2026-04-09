@@ -6,32 +6,32 @@ import { MdAutorenew } from 'react-icons/md';
 
 export default function CustomerServiceOnlineStatistik({
     pending_counter,
-    processing_counter,
-    waiting_counter,
+    meeting_counter,
+    finished_counter,
 }: {
     pending_counter: number;
-    processing_counter: number;
-    waiting_counter: number;
+    meeting_counter: number;
+    finished_counter: number;
 }) {
     return (
         <div className="w-full grid grid-cols-2 md:grid-cols-3 gap-4">
             <Stat
                 icon={<MdOutlinePendingActions size={24} />}
-                label="Pending Approval"
+                label="Pending"
                 value={pending_counter}
-                description="Tiket yang menunggu persetujuan"
+                description="Antrean online yang belum dijadwalkan meeting"
             />
             <Stat
                 icon={<MdAccessTime size={24} />}
-                label="Menunggu Respons"
-                value={waiting_counter}
-                description="Tiket yang belum ditindaklanjuti"
+                label="Meeting Hari Ini"
+                value={meeting_counter}
+                description="Hanya meeting customer service online pada hari ini"
             />
             <Stat
                 icon={<MdAutorenew size={24} />}
-                label="Sedang Diproses"
-                value={processing_counter}
-                description="Tiket yang sedang ditangani"
+                label="Selesai"
+                value={finished_counter}
+                description="Meeting yang sudah selesai dan sudah tercatat petugasnya"
             />
         </div>
     );

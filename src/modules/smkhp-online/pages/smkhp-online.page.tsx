@@ -1,41 +1,57 @@
 import SMKHPOnlineLayout from '../layouts/smkhp-online.layout';
+import * as React from 'react';
 
 import SMKHPOnlineStatistik from '../components/statistik/smkhp-online.statistik';
 import SMKHPOnlineQueue from '../components/queues/smkhp-online.queue';
+import SMKHPOnlineSkeleton from '../components/skeletons/smkhp-online.skeleton';
+import useSMKHPOnlineStore from '../store';
 
-const data = [
-    {
-        token: '1',
-        queue: 1,
-        name: 'Yudha',
-        phone: '08123',
-        status: 'pending',
-    },
-    {
-        token: '2',
-        queue: 2,
-        name: 'Budi',
-        phone: '08222',
-        status: 'menunggu',
-    },
-    {
-        token: '3',
-        queue: 3,
-        name: 'Siti',
-        phone: '08333',
-        status: 'diproses',
-    },
-];
+const getTodayRegistrationDate = () => {
+    return new Intl.DateTimeFormat('en-GB', {
+        timeZone: 'Asia/Jakarta',
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+    }).format(new Date());
+};
 
 export default function SMKHPOnlinePage() {
+    const { smkhp_online, getSMKHPOnline, isLoading } = useSMKHPOnlineStore();
+
+    React.useEffect(() => {
+        const unsubscribe = getSMKHPOnline();
+        return () => unsubscribe();
+    }, [getSMKHPOnline]);
+
+    const today = getTodayRegistrationDate();
+
+    const statistics = React.useMemo(
+        () => ({
+            pending: smkhp_online.filter((item) => item.status === 'pending')
+                .length,
+            meeting: smkhp_online.filter(
+                (item) =>
+                    item.status === 'meeting' &&
+                    item.tanggalRegistrasi === today,
+            ).length,
+            finished: smkhp_online.filter((item) => item.status === 'selesai')
+                .length,
+        }),
+        [smkhp_online, today],
+    );
+
+    if (isLoading && smkhp_online.length === 0) {
+        return <SMKHPOnlineSkeleton />;
+    }
+
     return (
         <SMKHPOnlineLayout>
             <SMKHPOnlineStatistik
-                pending_counter={0}
-                processing_counter={0}
-                waiting_counter={0}
+                pending_counter={statistics.pending}
+                meeting_counter={statistics.meeting}
+                finished_counter={statistics.finished}
             />
-            <SMKHPOnlineQueue data={data} />
+            <SMKHPOnlineQueue data={smkhp_online} />
         </SMKHPOnlineLayout>
     );
 }
