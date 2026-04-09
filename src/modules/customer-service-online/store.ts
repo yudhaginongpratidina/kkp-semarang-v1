@@ -2,11 +2,13 @@ import { create } from 'zustand';
 import {
     collection,
     doc,
+    getDocs,
     onSnapshot,
     orderBy,
     query,
     setDoc,
     updateDoc,
+    where,
 } from 'firebase/firestore';
 import { db } from '../../shared/configs/firebase';
 
@@ -89,6 +91,17 @@ const normalizeTime = (time?: string) => {
     if (!hour || !minute) return time;
 
     return `${hour.padStart(2, '0')}:${minute.padStart(2, '0')}`;
+};
+
+const findUserByEmail = async (email: string) => {
+    if (!email) return null;
+
+    const snapshot = await getDocs(
+        query(collection(db, 'users'), where('email', '==', email)),
+    );
+
+    const docSnap = snapshot.docs[0];
+    return docSnap ? docSnap.data() : null;
 };
 
 const useCustomerServiceOnlineStore = create<
@@ -218,6 +231,8 @@ const useCustomerServiceOnlineStore = create<
         set({ isSubmitting: true, error: null });
 
         try {
+            const matchedUser = await findUserByEmail(item.email);
+
             await updateDoc(doc(db, 'onlineCS', token), {
                 status: 'selesai',
                 nama_petugas: petugas.nama,
@@ -239,6 +254,29 @@ const useCustomerServiceOnlineStore = create<
                     link: item.linkmeet || '',
                 },
                 timestamp: Date.now(),
+            });
+
+            await setDoc(doc(db, 'historyCSOnline', token), {
+                token,
+                formattedNo: item.formattedNo || token,
+                email: item.email || '',
+                name: item.name || '',
+                nik: item.nik || '',
+                nomorHp: item.nomorHp || '',
+                kebutuhan: item.kebutuhan || '',
+                queueNo: item.queueNo || 0,
+                status: 'selesai',
+                subStatus: 'Selesai',
+                tanggalRegistrasi: item.tanggalRegistrasi || '',
+                timemeet: item.timemeet || '',
+                linkmeet: item.linkmeet || '',
+                nama_petugas: petugas.nama,
+                nip_petugas: petugas.nip,
+                catatan_petugas: catatan?.trim() || '',
+                npwp: matchedUser?.npwp || '',
+                uid: matchedUser?.uid || '',
+                timestamp: Date.now(),
+                updatedAt: Date.now(),
             });
 
             return { success: true };

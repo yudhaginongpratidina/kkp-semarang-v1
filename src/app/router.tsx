@@ -15,6 +15,7 @@ import SMKHPOnlineRoutesWithSkeleton from '../modules/smkhp-online/routes';
 import CustomerServiceOnlineRoutesWithSkeleton from '../modules/customer-service-online/routes';
 import LaboratoriumUmumRoutesWithSkeleton from '../modules/laboratorium-umum/routes';
 import LaboratoriumCRoutesWithSkeleton from '../modules/laboratorium-c/routes';
+import LabReportPreviewPage from '../modules/laboratory-shared/pages/lab-report.preview.page';
 
 // main router
 export const router = createBrowserRouter([
@@ -65,5 +66,9 @@ export const router = createBrowserRouter([
     {
         path: '/laboratorium-c/*',
         Component: LaboratoriumCRoutesWithSkeleton,
+    },
+    {
+        path: '/lhu-preview',
+        Component: LabReportPreviewPage,
     },
 ]);

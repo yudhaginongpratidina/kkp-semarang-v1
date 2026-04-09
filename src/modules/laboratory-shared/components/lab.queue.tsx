@@ -8,12 +8,13 @@ import {
     getLabFilterKey,
     getTestingFilterLabel,
     isCompletedStage,
+    isPublishStage,
     isTestingStage,
     type LabFilterKey,
     normalizeLabStatus,
 } from '../lab.utils';
 import LabResultForm from './lab-result.form';
-import LabReportView from './lab-report.view';
+import { openLabReportPreview } from '../lab-report.preview';
 
 type LabQueueProps = Omit<React.ComponentPropsWithoutRef<'div'>, 'children'> & {
     data: LabSample[];
@@ -64,9 +65,6 @@ export default function LabQueue({
     const [testingFilter, setTestingFilter] =
         React.useState<string>('Semua Pengujian');
     const [selectedInput, setSelectedInput] = React.useState<LabSample | null>(
-        null,
-    );
-    const [selectedView, setSelectedView] = React.useState<LabSample | null>(
         null,
     );
 
@@ -175,12 +173,39 @@ export default function LabQueue({
                                     isCompletedStage(item.status) ? (
                                         <button
                                             onClick={() =>
-                                                setSelectedView(item)
+                                                openLabReportPreview({
+                                                    item,
+                                                    title,
+                                                })
                                             }
                                             className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
                                         >
                                             {getLabActionLabel(item.status)}
                                         </button>
+                                    ) : isPublishStage(item.status) ? (
+                                        <div className="flex flex-wrap justify-end gap-2">
+                                            <button
+                                                onClick={() =>
+                                                    openLabReportPreview({
+                                                        item,
+                                                        title,
+                                                    })
+                                                }
+                                                className="px-3 py-2 text-[10px] font-black uppercase border border-slate-300 text-black hover:border-black transition-all rounded-sm"
+                                            >
+                                                PREVIEW LHU
+                                            </button>
+                                            <button
+                                                onClick={() =>
+                                                    void onAdvanceStatus(
+                                                        item.token,
+                                                    )
+                                                }
+                                                className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
+                                            >
+                                                KONFIRMASI AMBIL
+                                            </button>
+                                        </div>
                                     ) : isTestingStage(item.status) ? (
                                         <button
                                             onClick={() =>
@@ -221,18 +246,6 @@ export default function LabQueue({
                         isSubmitting={isSubmitting}
                         onSuccess={() => setSelectedInput(null)}
                     />
-                )}
-            </Modal>
-
-            <Modal
-                title={`VIEW LHU ${title.toUpperCase()}`}
-                open={!!selectedView}
-                onOpenChange={(open) => {
-                    if (!open) setSelectedView(null);
-                }}
-            >
-                {selectedView && (
-                    <LabReportView item={selectedView} title={title} />
                 )}
             </Modal>
         </>
