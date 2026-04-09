@@ -7,9 +7,11 @@ type ServiceType =
     | 'smkhp-offline'
     | 'smkhp-online'
     | 'customer-service-offline'
-    | 'customer-service-online';
+    | 'customer-service-online'
+    | 'laboratorium-umum'
+    | 'laboratorium-c';
 
-type QueueStatus = 'Pending' | 'Menunggu' | 'Diproses';
+type QueueStatus = 'Pending' | 'Menunggu' | 'Diproses' | 'Meeting' | 'Selesai';
 
 type BaseProps = {
     token: string;
@@ -89,9 +91,22 @@ const baseServiceConfig = {
         prefix: 'C',
         label: 'Customer Service',
     },
+    laboratorium: {
+        icon: <FaMobileAlt />,
+        prefix: 'L',
+        label: 'Laboratorium',
+    },
 } as const;
 
 const parseService = (type: ServiceType) => {
+    if (type === 'laboratorium-umum') {
+        return { service: 'laboratorium' as const, channel: 'umum' as const };
+    }
+
+    if (type === 'laboratorium-c') {
+        return { service: 'laboratorium' as const, channel: 'c' as const };
+    }
+
     const isOffline = type.endsWith('-offline');
     const channel = isOffline ? 'offline' : 'online';
     const service = type.replace(
@@ -108,7 +123,12 @@ const getServiceMeta = (type: ServiceType) => {
     return {
         icon: base.icon,
         prefix: base.prefix,
-        label: `${base.label} ${channel === 'offline' ? 'Offline' : 'Online'}`,
+        label:
+            channel === 'umum'
+                ? `${base.label} Umum`
+                : channel === 'c'
+                  ? `${base.label} C`
+                  : `${base.label} ${channel === 'offline' ? 'Offline' : 'Online'}`,
         channel,
     };
 };
@@ -140,6 +160,7 @@ const ItemQueueBase = (
     const isPending = status === 'Pending';
     const isWaiting = status === 'Menunggu';
     const isProcessing = status === 'Diproses';
+    const isMeeting = status === 'Meeting';
     const isCustomAction = React.isValidElement(onAction);
 
     return (
@@ -186,7 +207,7 @@ const ItemQueueBase = (
                 {isPending && isCustomAction && onAction}
                 {!isPending && (
                     <>
-                        {isProcessing && (
+                        {(isProcessing || isMeeting) && onRecall && (
                             <button
                                 onClick={onRecall}
                                 disabled={disabled}
