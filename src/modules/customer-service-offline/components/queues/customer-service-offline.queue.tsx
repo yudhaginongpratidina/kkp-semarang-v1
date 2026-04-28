@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
+import useQueueCaller from '../../../../../useQueueCaller';
 import { ItemQueue, Modal } from '../../../../shared/components';
 import CustomerServiceOfflineForm from '../forms/customer-service-offline.form';
 import useCustomerServiceOfflineStore, { type CSData } from '../../store';
@@ -46,6 +47,7 @@ export default function CustomerServiceOfflineQueue(
 ) {
     const { data, defaultFilter = 'All', className, ...rest } = props;
     const { updateCustomerServiceStatus } = useCustomerServiceOfflineStore();
+    const { callQueue } = useQueueCaller();
 
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
@@ -65,6 +67,20 @@ export default function CustomerServiceOfflineQueue(
         if (filter === 'All') return safeData;
         return safeData.filter((item) => item.status === filter);
     }, [safeData, filter]);
+
+    const handleStartProcess = async (item: QueueItem) => {
+        const success = await updateCustomerServiceStatus(
+            item.token,
+            'Diproses',
+        );
+        if (success) {
+            callQueue(item.name, item.queue, 'Customer Service');
+        }
+    };
+
+    const handleRecall = (item: QueueItem) => {
+        callQueue(item.name, item.queue, 'Customer Service');
+    };
 
     return (
         <div
@@ -119,10 +135,7 @@ export default function CustomerServiceOfflineQueue(
                             ) : item.status === 'Menunggu' ? (
                                 <button
                                     onClick={() =>
-                                        updateCustomerServiceStatus(
-                                            item.token,
-                                            'Diproses',
-                                        )
+                                        void handleStartProcess(item)
                                     }
                                     className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
                                 >
@@ -143,9 +156,7 @@ export default function CustomerServiceOfflineQueue(
                                 </Modal>
                             ) : null
                         }
-                        onRecall={() =>
-                            updateCustomerServiceStatus(item.token, 'Menunggu')
-                        }
+                        onRecall={() => handleRecall(item)}
                     />
                 ))}
             </div>

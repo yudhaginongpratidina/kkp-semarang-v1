@@ -15,6 +15,7 @@ export type LabSample = {
     lhuUrl: string;
     lpp: string;
     namaSampel: string;
+    namaLatin: string;
     nip: string;
     rawSelectedTests: string;
     selectedTests: string[];

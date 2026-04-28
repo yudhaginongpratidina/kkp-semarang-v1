@@ -118,6 +118,8 @@ export default function LabReportDocument({
                     <span>: {item.lpp || '-'}</span>
                     <span>Nama Sampel</span>
                     <span>: {item.namaSampel || '-'}</span>
+                    <span>Nama Latin</span>
+                    <span>: {item.namaLatin || '-'}</span>
                     <span>Tanggal Pengujian</span>
                     <span>: {formatLongDate(item.tanggalPengujian)}</span>
                     <span>Tanggal Penerbitan</span>

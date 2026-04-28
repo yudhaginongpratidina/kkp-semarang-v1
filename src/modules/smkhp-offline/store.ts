@@ -42,7 +42,7 @@ type SMKHPOfflineAction = {
     getSMKHP: () => () => void;
     getSMKHPByToken: (token: string) => Promise<void>;
     updateSMKHPHandle: (token: string, catatan?: string) => Promise<boolean>;
-    updateSMKHPStatus: (token: string, status: string) => Promise<void>;
+    updateSMKHPStatus: (token: string, status: string) => Promise<boolean>;
     setPetugas: (nama: string, nip: string) => void;
     setField: <K extends keyof SMKHPOfflineState>(
         key: K,
@@ -166,9 +166,10 @@ const useSMKHPOfflineStore = create<SMKHPOfflineState & SMKHPOfflineAction>(
         updateSMKHPStatus: async (token, status) => {
             try {
                 await updateDoc(doc(db, 'SMKHP', token), { subStatus: status });
-                // Feedback opsional bisa diletakkan di UI
+                return true;
             } catch (err: any) {
                 alert('Gagal memperbarui status: ' + err.message);
+                return false;
             }
         },
     }),

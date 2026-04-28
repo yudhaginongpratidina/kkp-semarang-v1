@@ -53,7 +53,7 @@ type CSAction = {
     updateCustomerServiceStatus: (
         token: string,
         status: string,
-    ) => Promise<void>;
+    ) => Promise<boolean>;
     setPetugas: (nama: string, nip: string) => void;
     setField: <K extends keyof CSState>(key: K, value: CSState[K]) => void;
 };
@@ -187,8 +187,10 @@ const useCustomerServiceOfflineStore = create<CSState & CSAction>(
                 await updateDoc(doc(db, 'CustomerService', token), {
                     subStatus: status,
                 });
+                return true;
             } catch (err: any) {
                 alert('Gagal memperbarui status CS: ' + err.message);
+                return false;
             }
         },
     }),

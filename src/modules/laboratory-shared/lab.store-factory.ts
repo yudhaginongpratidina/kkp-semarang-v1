@@ -28,6 +28,7 @@ type Petugas = {
 type CompletePayload = {
     token: string;
     result?: string;
+    namaLatin?: string;
     tanggalPenerbitan?: string;
     namaPenanggungJawab?: string;
     nipPenanggungJawab?: string;
@@ -73,6 +74,7 @@ const normalizeItem = (
         lhuUrl: value.lhuUrl || '',
         lpp: value.lpp || id,
         namaSampel: value.namaSampel || '-',
+        namaLatin: value.namaLatin || '',
         nip: value.nip || '-',
         rawSelectedTests: Array.isArray(value.selectedTests)
             ? value.selectedTests.join(', ')
@@ -197,6 +199,7 @@ export const createLabStore = (config: LabModuleConfig) =>
                         lhuUrl: item.lhuUrl || '',
                         lpp: item.lpp,
                         namaSampel: item.namaSampel,
+                        namaLatin: item.namaLatin || '',
                         nip: item.nip,
                         selectedTests: item.rawSelectedTests,
                         status: 'Selesai',
@@ -249,6 +252,7 @@ export const createLabStore = (config: LabModuleConfig) =>
         submitTestingStep: async ({
             token,
             result,
+            namaLatin,
             tanggalPenerbitan,
             namaPenanggungJawab,
             nipPenanggungJawab,
@@ -310,6 +314,7 @@ export const createLabStore = (config: LabModuleConfig) =>
                 lhuUrl: item.lhuUrl || '',
                 lpp: item.lpp,
                 namaSampel: item.namaSampel,
+                namaLatin: namaLatin?.trim() || item.namaLatin || '',
                 nip: item.nip,
                 selectedTests: item.rawSelectedTests,
                 status: nextStatus,

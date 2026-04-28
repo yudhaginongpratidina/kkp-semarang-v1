@@ -61,8 +61,8 @@ type HistoryAction = {
 const COLLECTION_KEYS = [
     'users',
     'history',
+    'historyLabUmum',
     'historyLabOfficial',
-    'historyOC',
     'historySMKHPOnline',
     'historyCSOnline',
 ] as const;
@@ -133,24 +133,24 @@ const normalizeHistory = (
     const details = (value.details || {}) as Record<string, any>;
     const serviceLabelMap: Record<string, string> = {
         history: details.type || value.type || 'Layanan Offline',
-        historyLabOfficial: 'Laboratorium',
-        historyOC: 'Laboratorium',
+        historyLabUmum: 'Laboratorium Umum',
+        historyLabOfficial: 'Laboratorium C',
         historySMKHPOnline: 'SMKHP Online',
         historyCSOnline: 'Customer Service Online',
     };
 
     const channelMap: Record<string, string> = {
         history: 'Offline',
+        historyLabUmum: 'Laboratorium',
         historyLabOfficial: 'Laboratorium',
-        historyOC: 'Laboratorium',
         historySMKHPOnline: 'Online',
         historyCSOnline: 'Online',
     };
 
     const titleMap: Record<string, string> = {
         history: `${details.type || value.type || 'Layanan'} ${details.token || value.token || id}`,
-        historyLabOfficial: `${value.lpp || id} - ${value.namaSampel || 'Lab Official'}`,
-        historyOC: `${value.lpp || id} - ${value.namaSampel || 'Lab OC'}`,
+        historyLabUmum: `${value.lpp || id} - ${value.namaSampel || 'Lab Umum'}`,
+        historyLabOfficial: `${value.lpp || id} - ${value.namaSampel || 'Lab C'}`,
         historySMKHPOnline: `${value.formattedNo || value.nomor_antrian || id} - SMKHP Online`,
         historyCSOnline: `${value.formattedNo || value.nomor_antrian || id} - Customer Service Online`,
     };
@@ -159,8 +159,8 @@ const normalizeHistory = (
         history: details.keluhan
             ? `Keluhan: ${details.keluhan}`
             : `Nomor HP: ${details.nomorHp || value.nomorHp || '-'}`,
+        historyLabUmum: `Petugas: ${value.namaPetugas || '-'} | Penanggung jawab: ${value.namaPenanggungJawab || '-'}`,
         historyLabOfficial: `Petugas: ${value.namaPetugas || '-'} | Penanggung jawab: ${value.namaPenanggungJawab || '-'}`,
-        historyOC: `Petugas: ${value.namaPetugas || '-'} | Penanggung jawab: ${value.namaPenanggungJawab || '-'}`,
         historySMKHPOnline: `No Aju: ${value.noAju || value.nomor_aju || '-'} | Jadwal: ${value.tanggalRegistrasi || value.jadwalMeeting?.tanggal || '-'}`,
         historyCSOnline: `Kebutuhan: ${value.kebutuhan || '-'} | Jadwal: ${value.tanggalRegistrasi || value.jadwalMeeting?.tanggal || '-'}`,
     };
@@ -177,7 +177,7 @@ const normalizeHistory = (
                 ? 'SMKHP Online'
                 : collectionName === 'historyCSOnline'
                   ? 'Customer Service Online'
-                  : collectionName.includes('Lab')
+                  : collectionName.toLowerCase().includes('lab')
                     ? 'Laboratorium'
                     : '-'),
         status: value.status || details.status || '-',
@@ -227,8 +227,8 @@ const useHistoryStore = create<HistoryState & HistoryAction>()((set) => ({
         const dataStore: Record<string, any[]> = {
             users: [],
             history: [],
+            historyLabUmum: [],
             historyLabOfficial: [],
-            historyOC: [],
             historySMKHPOnline: [],
             historyCSOnline: [],
         };
@@ -238,8 +238,8 @@ const useHistoryStore = create<HistoryState & HistoryAction>()((set) => ({
             const users = (dataStore.users || []) as HistoryUser[];
             const activities = [
                 ...(dataStore.history || []),
+                ...(dataStore.historyLabUmum || []),
                 ...(dataStore.historyLabOfficial || []),
-                ...(dataStore.historyOC || []),
                 ...(dataStore.historySMKHPOnline || []),
                 ...(dataStore.historyCSOnline || []),
             ] as UserActivity[];

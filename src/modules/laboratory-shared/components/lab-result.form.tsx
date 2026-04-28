@@ -33,6 +33,7 @@ type LabResultFormProps = {
     onSubmitResult: (payload: {
         token: string;
         result?: string;
+        namaLatin?: string;
         tanggalPenerbitan: string;
         namaPenanggungJawab: string;
         nipPenanggungJawab: string;
@@ -65,6 +66,7 @@ export default function LabResultForm({
     const [nipPenanggungJawab, setNipPenanggungJawab] = React.useState(
         item.nipPenanggungJawab || '',
     );
+    const [namaLatin, setNamaLatin] = React.useState(item.namaLatin || '');
 
     React.useEffect(() => {
         setResultValue(currentTesting?.result || '');
@@ -73,6 +75,7 @@ export default function LabResultForm({
         );
         setNamaPenanggungJawab(item.namaPenanggungJawab || '');
         setNipPenanggungJawab(item.nipPenanggungJawab || '');
+        setNamaLatin(item.namaLatin || '');
     }, [currentTesting?.result, item]);
 
     const handleSubmit = async (event: React.FormEvent) => {
@@ -94,6 +97,7 @@ export default function LabResultForm({
         const response = await onSubmitResult({
             token: item.token,
             result: resultValue,
+            namaLatin,
             tanggalPenerbitan: requiresPublication
                 ? toDisplayDate(tanggalPenerbitan)
                 : '',
@@ -108,6 +112,15 @@ export default function LabResultForm({
         <Form onSubmit={handleSubmit}>
             <TextInput label="Nomor LPP" value={item.lpp} disabled />
             <TextInput label="Nama Sampel" value={item.namaSampel} disabled />
+            <TextInput
+                label="Nama Latin"
+                value={namaLatin}
+                onChange={(event) => {
+                    const target = event.target as HTMLInputElement;
+                    setNamaLatin(target.value);
+                }}
+                placeholder="Masukkan nama latin sampel"
+            />
             <TextInput
                 label="Tanggal Pengujian"
                 value={item.tanggalPengujian}

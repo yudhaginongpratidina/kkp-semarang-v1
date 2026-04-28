@@ -1,5 +1,6 @@
 import * as React from 'react';
 import { cva } from 'class-variance-authority';
+import useQueueCaller from '../../../../../useQueueCaller';
 
 import { ItemQueue, Modal } from '../../../../shared/components';
 import SMKHPOfflineForm from '../forms/smkhp-offline.form';
@@ -46,6 +47,7 @@ const filterButtonVariants = cva(
 export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
     const { data, defaultFilter = 'All', className, ...rest } = props;
     const { updateSMKHPStatus } = useSMKHPOfflineStore();
+    const { callQueue } = useQueueCaller();
 
     const safeData: QueueItem[] = React.useMemo(() => {
         return data.map((item) => ({
@@ -65,6 +67,17 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
         if (filter === 'All') return safeData;
         return safeData.filter((item) => item.status === filter);
     }, [safeData, filter]);
+
+    const handleStartProcess = async (item: QueueItem) => {
+        const success = await updateSMKHPStatus(item.token, 'Diproses');
+        if (success) {
+            callQueue(item.name, item.queue, 'SMKHP');
+        }
+    };
+
+    const handleRecall = (item: QueueItem) => {
+        callQueue(item.name, item.queue, 'SMKHP');
+    };
 
     return (
         <div
@@ -119,10 +132,7 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                             ) : item.status === 'Menunggu' ? (
                                 <button
                                     onClick={() =>
-                                        updateSMKHPStatus(
-                                            item.token,
-                                            'Diproses',
-                                        )
+                                        void handleStartProcess(item)
                                     }
                                     className="px-3 py-2 text-[10px] font-black uppercase bg-black text-white border border-black hover:bg-white hover:text-black transition-all rounded-sm"
                                 >
@@ -141,9 +151,7 @@ export default function SMKHPOfflineQueue(props: SMKHPOfflineQueueListProps) {
                                 </Modal>
                             ) : null
                         }
-                        onRecall={() =>
-                            updateSMKHPStatus(item.token, 'Menunggu')
-                        }
+                        onRecall={() => handleRecall(item)}
                     />
                 ))}
             </div>

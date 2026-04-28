@@ -1,7 +1,9 @@
 import * as React from 'react';
 import type { ColumnDef } from '@tanstack/react-table';
 import { Button, Modal, Table } from '../../../../shared/components';
+import { FaFilePdf } from 'react-icons/fa';
 import { openLabReportPreview } from '../../../laboratory-shared/lab-report.preview';
+import { openHistoryReportPrint } from '../../history-report';
 import type { HistoryUser, UserActivity, UserNoAju } from '../../store';
 import useHistoryStore from '../../store';
 
@@ -72,13 +74,15 @@ const isSameUser = (user: HistoryUser, activity: UserActivity) => {
 
 const isLabActivity = (activity: UserActivity) => {
     return (
+        activity.sourceCollection === 'historyLabUmum' ||
         activity.sourceCollection === 'historyLabOfficial' ||
         activity.sourceCollection === 'historyOC'
     );
 };
 
 const getLabPreviewTitle = (activity: UserActivity) => {
-    return activity.sourceCollection === 'historyOC'
+    return activity.sourceCollection === 'historyLabOfficial' ||
+        activity.sourceCollection === 'historyOC'
         ? 'Laboratorium C'
         : 'Laboratorium Umum';
 };
@@ -241,6 +245,15 @@ export default function HistroyTable() {
 
     return (
         <div className="space-y-4">
+            <div className="flex justify-end">
+                <button
+                    className="h-9 px-3 border rounded-sm flex items-center gap-2 bg-black text-white hover:cursor-pointer"
+                    onClick={() => openHistoryReportPrint(activities)}
+                >
+                    <FaFilePdf className="h-4 w-4" />
+                    <span className="text-sm">Export PDF History</span>
+                </button>
+            </div>
             <div className="grid gap-4 md:grid-cols-3">
                 <div className="rounded-sm border border-slate-200 bg-white p-4">
                     <p className="text-xs font-bold uppercase text-slate-400">

@@ -1,5 +1,6 @@
 import { create } from 'zustand';
 import { createUserWithEmailAndPassword } from 'firebase/auth';
+import { deleteApp, initializeApp } from 'firebase/app';
 import {
     doc,
     updateDoc,
@@ -9,13 +10,15 @@ import {
     setDoc,
     getDoc,
 } from 'firebase/firestore';
-import { auth, db } from '../../shared/configs/firebase';
+import { getAuth } from 'firebase/auth';
+import { auth, db, firebaseConfig } from '../../shared/configs/firebase';
 
 export type Officer = {
     id: string;
     full_name: string;
     nip: string;
     role: string;
+    email?: string;
 };
 
 type OfficerManagementState = {
@@ -37,6 +40,14 @@ type OfficerManagementAction = {
     get_officers: () => Promise<void>;
     update_officer: (id: string) => Promise<void>;
     create_officer: () => Promise<void>;
+    import_officers: (
+        rows: Array<{
+            full_name: string;
+            nip: string;
+            role: string;
+            email?: string;
+        }>,
+    ) => Promise<{ success: boolean; message: string }>;
     get_officer_by_id: (id: string) => Promise<void>;
     delete_officer: (id: string) => Promise<void>;
     reset_form: () => void;
@@ -56,6 +67,17 @@ const initialState: Omit<
 const generateEmail = (name: string) => {
     const firstName = name.trim().split(' ')[0].toLowerCase();
     return `${firstName}.${Math.floor(Math.random() * 1000)}@company.com`;
+};
+
+const createImportEmail = (name: string, nip: string) => {
+    const baseName = name
+        .toLowerCase()
+        .trim()
+        .replace(/[^a-z0-9]+/g, '.')
+        .replace(/^\.|\.$/g, '');
+    const safeNip = nip.replace(/\s+/g, '');
+
+    return `${baseName || 'officer'}.${safeNip}@company.com`;
 };
 
 const useOfficerManagementStore = create<
@@ -119,6 +141,66 @@ const useOfficerManagementStore = create<
         } catch (error: any) {
             set({ is_loading: false, is_error: true, message: error.message });
             alert('Gagal membuat petugas: ' + error.message);
+        }
+    },
+
+    import_officers: async (rows) => {
+        set({ is_loading: true, is_error: false, message: '' });
+
+        const normalizedRows = rows
+            .map((row) => ({
+                full_name: String(row.full_name || '').trim(),
+                nip: String(row.nip || '').trim(),
+                role: String(row.role || '').trim(),
+                email: String(row.email || '').trim(),
+            }))
+            .filter((row) => row.full_name && row.nip && row.role);
+
+        if (normalizedRows.length === 0) {
+            const message = 'Tidak ada data petugas valid di file Excel.';
+            set({ is_loading: false, is_error: true, message });
+            alert(message);
+            return { success: false, message };
+        }
+
+        const secondaryApp = initializeApp(
+            firebaseConfig,
+            `officer-import-${Date.now()}`,
+        );
+        const secondaryAuth = getAuth(secondaryApp);
+
+        try {
+            for (const row of normalizedRows) {
+                const email =
+                    row.email || createImportEmail(row.full_name, row.nip);
+                const userCredential = await createUserWithEmailAndPassword(
+                    secondaryAuth,
+                    email,
+                    row.nip,
+                );
+
+                await setDoc(doc(db, 'officers', userCredential.user.uid), {
+                    full_name: row.full_name,
+                    nip: row.nip,
+                    role: row.role,
+                    email,
+                    created_at: new Date().toISOString(),
+                });
+            }
+
+            await get().get_officers();
+            const message = `${normalizedRows.length} data petugas berhasil diimport.`;
+            alert(message);
+            return { success: true, message };
+        } catch (error: any) {
+            const message = error?.message || 'Gagal import data petugas.';
+            set({ is_error: true, message });
+            alert(message);
+            return { success: false, message };
+        } finally {
+            await secondaryAuth.signOut().catch(() => undefined);
+            await deleteApp(secondaryApp).catch(() => undefined);
+            set({ is_loading: false });
         }
     },
 

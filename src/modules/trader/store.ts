@@ -32,6 +32,10 @@ type TraderAction = {
     getTraders: () => () => void;
     getTraderById: (id: string) => Promise<void>;
     addTrader: (data: TraderForm) => Promise<boolean>;
+    importTraders: (rows: TraderForm[]) => Promise<{
+        success: boolean;
+        message: string;
+    }>;
     updateTrader: (oldId: string, data: TraderForm) => Promise<boolean>;
     deleteTrader: (id: string) => Promise<boolean>;
     clearState: () => void;
@@ -112,6 +116,54 @@ const useTraderStore = create<TraderState & TraderAction>((set) => ({
             set({ error: err.message, isLoading: false });
             alert('Gagal menambah trader: ' + err.message);
             return false;
+        }
+    },
+
+    importTraders: async (rows) => {
+        set({ isLoading: true, error: null });
+        try {
+            const cleanedRows = rows
+                .map((row) => ({
+                    kode_trader: String(row.kode_trader || '').trim(),
+                    nama_trader: String(row.nama_trader || '').trim(),
+                    npwp: String(row.npwp || '').trim(),
+                    alamat_trader: String(row.alamat_trader || '').trim(),
+                }))
+                .filter(
+                    (row) =>
+                        row.kode_trader &&
+                        row.nama_trader &&
+                        row.npwp &&
+                        row.alamat_trader,
+                );
+
+            if (cleanedRows.length === 0) {
+                throw new Error('Tidak ada data trader valid di file Excel.');
+            }
+
+            await Promise.all(
+                cleanedRows.map((row) =>
+                    setDoc(
+                        doc(db, 'traders', row.npwp),
+                        {
+                            ...row,
+                            id: row.npwp,
+                            updated_at: new Date().toISOString(),
+                        },
+                        { merge: true },
+                    ),
+                ),
+            );
+
+            const message = `${cleanedRows.length} data trader berhasil diimport.`;
+            set({ isLoading: false });
+            alert(message);
+            return { success: true, message };
+        } catch (err: any) {
+            const message = err?.message || 'Gagal import data trader.';
+            set({ error: message, isLoading: false });
+            alert(message);
+            return { success: false, message };
         }
     },
 
