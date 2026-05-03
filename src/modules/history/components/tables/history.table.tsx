@@ -248,7 +248,7 @@ export default function HistroyTable() {
             <div className="flex justify-end">
                 <button
                     className="h-9 px-3 border rounded-sm flex items-center gap-2 bg-black text-white hover:cursor-pointer"
-                    onClick={() => openHistoryReportPrint(activities)}
+                    onClick={() => openHistoryReportPrint(activities, users)}
                 >
                     <FaFilePdf className="h-4 w-4" />
                     <span className="text-sm">Export PDF History</span>

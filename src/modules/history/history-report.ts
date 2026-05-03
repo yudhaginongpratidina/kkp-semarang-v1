@@ -1,4 +1,4 @@
-import type { UserActivity } from './store';
+import type { HistoryUser, UserActivity } from './store';
 
 const formatDisplayDate = (value?: string | number) => {
     if (!value) return '-';
@@ -50,16 +50,25 @@ const getGroupLabel = (activity: UserActivity) => {
     return activity.serviceLabel || 'Lainnya';
 };
 
-export const openHistoryReportPrint = (activities: UserActivity[]) => {
+export const openHistoryReportPrint = (activities: UserActivity[], users: HistoryUser[]) => {
+
+    const usersByNpwp = new Map(
+        users
+            .filter((user) => (user.npwp || '').trim() && user.npwp !== '-')
+            .map((user) => [user.npwp.trim(), user]),
+    );
+
     const groups = activities.reduce<Record<string, UserActivity[]>>(
         (acc, activity) => {
-            const label = getGroupLabel(activity);
-            acc[label] = [...(acc[label] || []), activity];
+            const traderLabel =
+                usersByNpwp.get((activity.npwp || '').trim())?.namaTrader ||
+                activity.userName ||
+                'Trader Tidak Diketahui';
+            acc[traderLabel] = [...(acc[traderLabel] || []), activity];
             return acc;
         },
         {},
     );
-
     const orderedGroups = Object.entries(groups).sort(([left], [right]) =>
         left.localeCompare(right),
     );
@@ -164,7 +173,7 @@ export const openHistoryReportPrint = (activities: UserActivity[]) => {
                 </style>
             </head>
             <body>
-                <h1>Laporan Keseluruhan History</h1>
+                <h1>Laporan History per Nama Trader</h1>
                 <p>Dicetak ${formatDisplayDate(Date.now())}</p>
                 ${sectionsHtml || '<p>Belum ada data history.</p>'}
             </body>
