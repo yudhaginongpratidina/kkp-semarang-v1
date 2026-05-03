@@ -19,6 +19,8 @@ const LaboratoriumRouterPage = lazy(
     () => import('./pages/laboratorium-router.page'),
 );
 const SettingRouterPage = lazy(() => import('./pages/setting-router.page'));
+const ProfileSettingsPage = lazy(() => import('../settings/pages/profile-settings.page'));
+const PasswordSettingsPage = lazy(() => import('../settings/pages/password-settings.page'));
 
 export default function MenuRoutesWithSkeleton() {
     return (
@@ -55,7 +57,22 @@ export default function MenuRoutesWithSkeleton() {
                     </Suspense>
                 }
             />
-            ,
+            <Route
+                path="/settings/profile"
+                element={
+                    <Suspense fallback={<SettingMenuSkeleton />}>
+                        <ProfileSettingsPage />
+                    </Suspense>
+                }
+            />
+            <Route
+                path="/settings/password"
+                element={
+                    <Suspense fallback={<SettingMenuSkeleton />}>
+                        <PasswordSettingsPage />
+                    </Suspense>
+                }
+            />
             <Route
                 path="/laboratorium"
                 element={
